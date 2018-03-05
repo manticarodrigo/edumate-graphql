@@ -1,14 +1,18 @@
-# import Post, Poll, PollOption from "./generated/prisma.graphql"
+# import ID, File, Post, Poll, PollOption from "./generated/prisma.graphql"
 
 type Query {
+  me: User
+  file(id: ID!): File
+  files: [File!]!
   feed: [Post!]!
   post(id: ID!): Post
-  me: User
 }
 
 type Mutation {
   register(email: String!, password: String!, username: String!, firstName: String!, lastName: String!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
+  renameFile(id: ID!, name: String!): File
+  deleteFile(id: ID!): File
   createPost(text: String!, imageUrl: String, poll: PollCreateOneWithoutPostInput): Post!
   deletePost(id: ID!): Post!
 }
