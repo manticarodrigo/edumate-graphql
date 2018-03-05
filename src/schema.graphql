@@ -1,0 +1,28 @@
+# import Post, Poll, PollOption from "./generated/prisma.graphql"
+
+type Query {
+  feed: [Post!]!
+  post(id: ID!): Post
+  me: User
+}
+
+type Mutation {
+  register(email: String!, password: String!, username: String!, firstName: String!, lastName: String!): AuthPayload!
+  login(email: String!, password: String!): AuthPayload!
+  createPost(text: String!, imageUrl: String, poll: PollCreateOneWithoutPostInput): Post!
+  deletePost(id: ID!): Post!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type User {
+  id: ID!
+  email: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  imageUrl: String
+}

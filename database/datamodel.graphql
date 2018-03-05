@@ -1,0 +1,76 @@
+type File {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  contentType: String!
+  name: String!
+  secret: String! @unique
+  size: Int!
+  url: String! @unique
+}
+
+type User {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String! @unique
+  password: String!
+  username: String! @unique
+  firstName: String!
+  lastName: String!
+  imageUrl: String
+  posts: [Post!]! @relation(name: "UserPosts")
+  coursesTaught: [Course!]! @relation(name: "CourseInstructors")
+  coursesTaken: [Course!]! @relation(name: "CourseStudents")
+  votesCasted: [PollOption!]! @relation(name: "PollOptionVotes")
+}
+
+type Course {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  description: String!
+  imageUrl: String
+  instructors: [User!]! @relation(name: "CourseInstructors")
+  students: [User!]! @relation(name: "CourseStudents")
+  tasks: [Task!]! @relation(name: "CourseTasks")
+}
+
+type Task {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  description: String
+  done: Boolean
+  course: Course @relation(name: "CourseTasks")
+}
+
+type Post {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  author: User! @relation(name: "UserPosts")
+  text: String!
+  imageUrl: String
+  poll: Poll @relation(name: "PostPoll")
+}
+
+type Poll {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  post: Post! @relation(name: "PostPoll")
+  options: [PollOption!]! @relation(name: "PollOptions")
+  endDate: DateTime
+}
+
+type PollOption {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  poll: Poll! @relation(name: "PollOptions")
+  name: String!
+  votes: [User!]! @relation(name: "PollOptionVotes")
+}
