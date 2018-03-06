@@ -1,65 +1,69 @@
 const uuid = require('uuid/v1')
 const mime = require('mime-types')
-const multiparty = require('multiparty')
+const AWS = require('aws-sdk')
+var fs =  require('fs')
 
-module.exports = ({ s3, prisma }) => (req, res) => {
-  let form = new multiparty.Form()
+const s3client = new AWS.S3({
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  params: {
+    Bucket: process.env.S3_BUCKET
+  },
+  endpoint: new AWS.Endpoint('http://localhost:4569')
+})
 
-  form.on('part', async function(part) {
-    if (part.name !== 'data') {
-      return
-    }
+exports.processUpload = async ( file, ctx ) => {
+  console.log('processing upload')
+  if (!file) {
+    return 'No file received.'
+  }
 
-    const name = part.filename
-    const secret = uuid()
-    const size = part.byteCount
-    const contentType = mime.lookup(part.filename)
+  const name = file.filename
+  const secret = uuid()
+  const size = ctx.request.rawHeaders[ctx.request.rawHeaders.indexOf('Content-Length') + 1]
+  const contentType = mime.lookup(file.filename)
 
-    try {
-      // Upload to S3
-      const response = await s3
-        .upload({
-          Key: secret,
-          ACL: 'public-read',
-          Body: part,
-          ContentLength: size,
-          ContentType: contentType,
-        })
-        .promise()
+  console.log(name)
+  console.log(secret)
+  console.log(size)
+  console.log(contentType)
 
-      const url = response.Location
+  // Upload to S3
+  const response = await s3client
+    .upload({
+      Key: secret,
+      ACL: 'public-read',
+      Body: file.stream,
+      ContentLength: size,
+      ContentType: contentType,
+    })
+    .promise()
 
-      // Sync with Prisma
-      const data = {
-        name,
-        size,
-        secret,
-        contentType,
-        url,
-      }
+  const url = response.Location
+  console.log('received s3 file with url:')
+  console.log(url)
 
-      const { id } = await prisma.mutation.createFile({ data }, ` { id } `)
+  // Sync with Prisma
+  const data = {
+    name,
+    size,
+    secret,
+    contentType,
+    url,
+  }
 
-      const file = {
-        id,
-        name,
-        secret,
-        contentType,
-        size,
-        url,
-      }
+  const { id } = await ctx.db.mutation.createFile({ data }, ` { id } `)
 
-      return res.status(200).send(file)
-    } catch (err) {
-      console.log(err)
-      return res.sendStatus(500)
-    }
-  })
+  const newFile = {
+    id,
+    name,
+    secret,
+    contentType,
+    size,
+    url,
+  }
+  console.log('saved prisma file:')
+  console.log(newFile)
 
-  form.on('error', err => {
-    console.log(err)
-    return res.sendStatus(500)
-  })
-
-  form.parse(req)
+  return newFile
 }
