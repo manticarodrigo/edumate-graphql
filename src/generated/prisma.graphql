@@ -21,10 +21,9 @@ type File implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  contentType: String!
-  name: String!
-  secret: String!
-  size: Int!
+  filename: String!
+  mimetype: String!
+  encoding: String!
   url: String!
 }
 
@@ -32,17 +31,17 @@ type Poll implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  endDate: DateTime
   post(where: PostWhereInput): Post!
   options(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption!]
+  endDate: DateTime
 }
 
 type PollOption implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  name: String!
   poll(where: PollWhereInput): Poll!
+  name: String!
   votes(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
 }
 
@@ -50,9 +49,9 @@ type Post implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  author(where: UserWhereInput): User!
   text: String!
   imageUrl: String
-  author(where: UserWhereInput): User!
   poll(where: PollWhereInput): Poll
 }
 
@@ -71,8 +70,8 @@ type User implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -663,10 +662,9 @@ type FileConnection {
 }
 
 input FileCreateInput {
-  contentType: String!
-  name: String!
-  secret: String!
-  size: Int!
+  filename: String!
+  mimetype: String!
+  encoding: String!
   url: String!
 }
 
@@ -691,14 +689,12 @@ enum FileOrderByInput {
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
-  contentType_ASC
-  contentType_DESC
-  name_ASC
-  name_DESC
-  secret_ASC
-  secret_DESC
-  size_ASC
-  size_DESC
+  filename_ASC
+  filename_DESC
+  mimetype_ASC
+  mimetype_DESC
+  encoding_ASC
+  encoding_DESC
   url_ASC
   url_DESC
 }
@@ -707,10 +703,9 @@ type FilePreviousValues {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  contentType: String!
-  name: String!
-  secret: String!
-  size: Int!
+  filename: String!
+  mimetype: String!
+  encoding: String!
   url: String!
 }
 
@@ -750,10 +745,9 @@ input FileSubscriptionWhereInput {
 }
 
 input FileUpdateInput {
-  contentType: String
-  name: String
-  secret: String
-  size: Int
+  filename: String
+  mimetype: String
+  encoding: String
   url: String
 }
 
@@ -877,194 +871,165 @@ input FileWhereInput {
   All values greater than or equal the given value.
   """
   updatedAt_gte: DateTime
-  contentType: String
+  filename: String
   """
   All values that are not equal to given value.
   """
-  contentType_not: String
+  filename_not: String
   """
   All values that are contained in given list.
   """
-  contentType_in: [String!]
+  filename_in: [String!]
   """
   All values that are not contained in given list.
   """
-  contentType_not_in: [String!]
+  filename_not_in: [String!]
   """
   All values less than the given value.
   """
-  contentType_lt: String
+  filename_lt: String
   """
   All values less than or equal the given value.
   """
-  contentType_lte: String
+  filename_lte: String
   """
   All values greater than the given value.
   """
-  contentType_gt: String
+  filename_gt: String
   """
   All values greater than or equal the given value.
   """
-  contentType_gte: String
+  filename_gte: String
   """
   All values containing the given string.
   """
-  contentType_contains: String
+  filename_contains: String
   """
   All values not containing the given string.
   """
-  contentType_not_contains: String
+  filename_not_contains: String
   """
   All values starting with the given string.
   """
-  contentType_starts_with: String
+  filename_starts_with: String
   """
   All values not starting with the given string.
   """
-  contentType_not_starts_with: String
+  filename_not_starts_with: String
   """
   All values ending with the given string.
   """
-  contentType_ends_with: String
+  filename_ends_with: String
   """
   All values not ending with the given string.
   """
-  contentType_not_ends_with: String
-  name: String
+  filename_not_ends_with: String
+  mimetype: String
   """
   All values that are not equal to given value.
   """
-  name_not: String
+  mimetype_not: String
   """
   All values that are contained in given list.
   """
-  name_in: [String!]
+  mimetype_in: [String!]
   """
   All values that are not contained in given list.
   """
-  name_not_in: [String!]
+  mimetype_not_in: [String!]
   """
   All values less than the given value.
   """
-  name_lt: String
+  mimetype_lt: String
   """
   All values less than or equal the given value.
   """
-  name_lte: String
+  mimetype_lte: String
   """
   All values greater than the given value.
   """
-  name_gt: String
+  mimetype_gt: String
   """
   All values greater than or equal the given value.
   """
-  name_gte: String
+  mimetype_gte: String
   """
   All values containing the given string.
   """
-  name_contains: String
+  mimetype_contains: String
   """
   All values not containing the given string.
   """
-  name_not_contains: String
+  mimetype_not_contains: String
   """
   All values starting with the given string.
   """
-  name_starts_with: String
+  mimetype_starts_with: String
   """
   All values not starting with the given string.
   """
-  name_not_starts_with: String
+  mimetype_not_starts_with: String
   """
   All values ending with the given string.
   """
-  name_ends_with: String
+  mimetype_ends_with: String
   """
   All values not ending with the given string.
   """
-  name_not_ends_with: String
-  secret: String
+  mimetype_not_ends_with: String
+  encoding: String
   """
   All values that are not equal to given value.
   """
-  secret_not: String
+  encoding_not: String
   """
   All values that are contained in given list.
   """
-  secret_in: [String!]
+  encoding_in: [String!]
   """
   All values that are not contained in given list.
   """
-  secret_not_in: [String!]
+  encoding_not_in: [String!]
   """
   All values less than the given value.
   """
-  secret_lt: String
+  encoding_lt: String
   """
   All values less than or equal the given value.
   """
-  secret_lte: String
+  encoding_lte: String
   """
   All values greater than the given value.
   """
-  secret_gt: String
+  encoding_gt: String
   """
   All values greater than or equal the given value.
   """
-  secret_gte: String
+  encoding_gte: String
   """
   All values containing the given string.
   """
-  secret_contains: String
+  encoding_contains: String
   """
   All values not containing the given string.
   """
-  secret_not_contains: String
+  encoding_not_contains: String
   """
   All values starting with the given string.
   """
-  secret_starts_with: String
+  encoding_starts_with: String
   """
   All values not starting with the given string.
   """
-  secret_not_starts_with: String
+  encoding_not_starts_with: String
   """
   All values ending with the given string.
   """
-  secret_ends_with: String
+  encoding_ends_with: String
   """
   All values not ending with the given string.
   """
-  secret_not_ends_with: String
-  size: Int
-  """
-  All values that are not equal to given value.
-  """
-  size_not: Int
-  """
-  All values that are contained in given list.
-  """
-  size_in: [Int!]
-  """
-  All values that are not contained in given list.
-  """
-  size_not_in: [Int!]
-  """
-  All values less than the given value.
-  """
-  size_lt: Int
-  """
-  All values less than or equal the given value.
-  """
-  size_lte: Int
-  """
-  All values greater than the given value.
-  """
-  size_gt: Int
-  """
-  All values greater than or equal the given value.
-  """
-  size_gte: Int
+  encoding_not_ends_with: String
   url: String
   """
   All values that are not equal to given value.
@@ -1122,7 +1087,6 @@ input FileWhereInput {
 
 input FileWhereUniqueInput {
   id: ID
-  secret: String
   url: String
 }
 
@@ -2727,8 +2691,8 @@ type UserConnection {
 
 input UserCreateInput {
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2760,8 +2724,8 @@ input UserCreateOneWithoutPostsInput {
 
 input UserCreateWithoutCoursesTakenInput {
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2772,8 +2736,8 @@ input UserCreateWithoutCoursesTakenInput {
 
 input UserCreateWithoutCoursesTaughtInput {
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2784,8 +2748,8 @@ input UserCreateWithoutCoursesTaughtInput {
 
 input UserCreateWithoutPostsInput {
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2796,8 +2760,8 @@ input UserCreateWithoutPostsInput {
 
 input UserCreateWithoutVotesCastedInput {
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2829,10 +2793,10 @@ enum UserOrderByInput {
   updatedAt_DESC
   email_ASC
   email_DESC
-  username_ASC
-  username_DESC
   password_ASC
   password_DESC
+  username_ASC
+  username_DESC
   firstName_ASC
   firstName_DESC
   lastName_ASC
@@ -2846,8 +2810,8 @@ type UserPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   email: String!
-  username: String!
   password: String!
+  username: String!
   firstName: String!
   lastName: String!
   imageUrl: String
@@ -2890,8 +2854,8 @@ input UserSubscriptionWhereInput {
 
 input UserUpdateInput {
   email: String
-  username: String
   password: String
+  username: String
   firstName: String
   lastName: String
   imageUrl: String
@@ -2939,8 +2903,8 @@ input UserUpdateOneWithoutPostsInput {
 
 input UserUpdateWithoutCoursesTakenDataInput {
   email: String
-  username: String
   password: String
+  username: String
   firstName: String
   lastName: String
   imageUrl: String
@@ -2956,8 +2920,8 @@ input UserUpdateWithoutCoursesTakenInput {
 
 input UserUpdateWithoutCoursesTaughtDataInput {
   email: String
-  username: String
   password: String
+  username: String
   firstName: String
   lastName: String
   imageUrl: String
@@ -2973,8 +2937,8 @@ input UserUpdateWithoutCoursesTaughtInput {
 
 input UserUpdateWithoutPostsDataInput {
   email: String
-  username: String
   password: String
+  username: String
   firstName: String
   lastName: String
   imageUrl: String
@@ -2990,8 +2954,8 @@ input UserUpdateWithoutPostsInput {
 
 input UserUpdateWithoutVotesCastedDataInput {
   email: String
-  username: String
   password: String
+  username: String
   firstName: String
   lastName: String
   imageUrl: String
@@ -3202,59 +3166,6 @@ input UserWhereInput {
   All values not ending with the given string.
   """
   email_not_ends_with: String
-  username: String
-  """
-  All values that are not equal to given value.
-  """
-  username_not: String
-  """
-  All values that are contained in given list.
-  """
-  username_in: [String!]
-  """
-  All values that are not contained in given list.
-  """
-  username_not_in: [String!]
-  """
-  All values less than the given value.
-  """
-  username_lt: String
-  """
-  All values less than or equal the given value.
-  """
-  username_lte: String
-  """
-  All values greater than the given value.
-  """
-  username_gt: String
-  """
-  All values greater than or equal the given value.
-  """
-  username_gte: String
-  """
-  All values containing the given string.
-  """
-  username_contains: String
-  """
-  All values not containing the given string.
-  """
-  username_not_contains: String
-  """
-  All values starting with the given string.
-  """
-  username_starts_with: String
-  """
-  All values not starting with the given string.
-  """
-  username_not_starts_with: String
-  """
-  All values ending with the given string.
-  """
-  username_ends_with: String
-  """
-  All values not ending with the given string.
-  """
-  username_not_ends_with: String
   password: String
   """
   All values that are not equal to given value.
@@ -3308,6 +3219,59 @@ input UserWhereInput {
   All values not ending with the given string.
   """
   password_not_ends_with: String
+  username: String
+  """
+  All values that are not equal to given value.
+  """
+  username_not: String
+  """
+  All values that are contained in given list.
+  """
+  username_in: [String!]
+  """
+  All values that are not contained in given list.
+  """
+  username_not_in: [String!]
+  """
+  All values less than the given value.
+  """
+  username_lt: String
+  """
+  All values less than or equal the given value.
+  """
+  username_lte: String
+  """
+  All values greater than the given value.
+  """
+  username_gt: String
+  """
+  All values greater than or equal the given value.
+  """
+  username_gte: String
+  """
+  All values containing the given string.
+  """
+  username_contains: String
+  """
+  All values not containing the given string.
+  """
+  username_not_contains: String
+  """
+  All values starting with the given string.
+  """
+  username_starts_with: String
+  """
+  All values not starting with the given string.
+  """
+  username_not_starts_with: String
+  """
+  All values ending with the given string.
+  """
+  username_ends_with: String
+  """
+  All values not ending with the given string.
+  """
+  username_not_ends_with: String
   firstName: String
   """
   All values that are not equal to given value.

@@ -5,15 +5,29 @@ const post = {
   async createPost(parent, { text, images, poll }, ctx, info) {
     const userId = getUserId(ctx)
     console.log('received mutation')
-    const image = await images[0]
-    return await processUpload(image, ctx)
-    .then(image => {
-      console.log(image)
-      const imageUrl = image.url
+    if (images) {
+      const image = images[0]
+      return await processUpload(image, ctx)
+      .then(image => {
+        console.log(image)
+        const imageUrl = image.url
+        return ctx.db.mutation.createPost({
+          data: {
+            text,
+            imageUrl,
+            poll,
+            author: {
+              connect: {
+                id: userId
+              },
+            },
+          },
+        }, info)
+      })
+    } else {
       return ctx.db.mutation.createPost({
         data: {
           text,
-          imageUrl,
           poll,
           author: {
             connect: {
@@ -22,7 +36,7 @@ const post = {
           },
         },
       }, info)
-    })
+    }
   },
 
   async deletePost(parent, { id }, ctx, info) {

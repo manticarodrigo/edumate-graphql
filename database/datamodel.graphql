@@ -2,10 +2,9 @@ type File {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
-  contentType: String!
-  name: String!
-  secret: String! @unique
-  size: Int!
+  filename: String!
+  mimetype: String!
+  encoding: String!
   url: String! @unique
 }
 
@@ -23,6 +22,7 @@ type User {
   coursesTaught: [Course!]! @relation(name: "CourseInstructors")
   coursesTaken: [Course!]! @relation(name: "CourseStudents")
   votesCasted: [PollOption!]! @relation(name: "PollOptionVotes")
+  postsLikes: [Post] @relation(name: "PostLikes")
 }
 
 type Course {
@@ -55,6 +55,7 @@ type Post {
   text: String!
   imageUrl: String
   poll: Poll @relation(name: "PostPoll")
+  likes: [User] @relation(name: "PostLikes")
 }
 
 type Poll {

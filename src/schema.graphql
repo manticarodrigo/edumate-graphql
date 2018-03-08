@@ -13,12 +13,9 @@ type Query {
 type Mutation {
   register(email: String!, password: String!, username: String!, firstName: String!, lastName: String!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
-  uploadFile (file: Upload!): File!
-  uploadFiles (files: [Upload!]!): [File!]!
-  renameFile(id: ID!, name: String!): File
-  deleteFile(id: ID!): File
   createPost(text: String!, images: [Upload], poll: PollCreateOneWithoutPostInput): Post!
   deletePost(id: ID!): Post!
+  createVote(optionId: ID!): PollOption!
 }
 
 type AuthPayload {
