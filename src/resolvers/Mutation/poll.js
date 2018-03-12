@@ -6,8 +6,8 @@ const poll = {
     console.log('received vote mutation for option with id:')
     console.log(optionId)
     return ctx.db.mutation.updatePollOption({
+      where: { id: optionId },
       data: {
-        optionId,
         votes: {
           connect: [{
             id: userId

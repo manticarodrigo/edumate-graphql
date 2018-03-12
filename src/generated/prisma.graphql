@@ -40,9 +40,17 @@ type PollOption implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  poll(where: PollWhereInput): Poll!
   name: String!
-  votes(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
+  poll(where: PollWhereInput): Poll!
+  votes(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption!]
+}
+
+type PollOptionVote implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  option(where: PollOptionWhereInput): PollOption!
+  user(where: UserWhereInput): User!
 }
 
 type Post implements Node {
@@ -53,6 +61,7 @@ type Post implements Node {
   text: String!
   imageUrl: String
   poll(where: PollWhereInput): Poll
+  likes(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
 }
 
 type Task implements Node {
@@ -78,7 +87,8 @@ type User implements Node {
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
   coursesTaught(where: CourseWhereInput, orderBy: CourseOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Course!]
   coursesTaken(where: CourseWhereInput, orderBy: CourseOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Course!]
-  votesCasted(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption!]
+  votesCasted(where: PollOptionVoteWhereInput, orderBy: PollOptionVoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOptionVote!]
+  postsLiked(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
 }
 
 
@@ -99,6 +109,10 @@ type AggregatePoll {
 }
 
 type AggregatePollOption {
+  count: Int!
+}
+
+type AggregatePollOptionVote {
   count: Int!
 }
 
@@ -1104,6 +1118,7 @@ type Mutation {
   createPost(data: PostCreateInput!): Post!
   createPoll(data: PollCreateInput!): Poll!
   createPollOption(data: PollOptionCreateInput!): PollOption!
+  createPollOptionVote(data: PollOptionVoteCreateInput!): PollOptionVote!
   updateFile(data: FileUpdateInput!, where: FileWhereUniqueInput!): File
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updateCourse(data: CourseUpdateInput!, where: CourseWhereUniqueInput!): Course
@@ -1111,6 +1126,7 @@ type Mutation {
   updatePost(data: PostUpdateInput!, where: PostWhereUniqueInput!): Post
   updatePoll(data: PollUpdateInput!, where: PollWhereUniqueInput!): Poll
   updatePollOption(data: PollOptionUpdateInput!, where: PollOptionWhereUniqueInput!): PollOption
+  updatePollOptionVote(data: PollOptionVoteUpdateInput!, where: PollOptionVoteWhereUniqueInput!): PollOptionVote
   deleteFile(where: FileWhereUniqueInput!): File
   deleteUser(where: UserWhereUniqueInput!): User
   deleteCourse(where: CourseWhereUniqueInput!): Course
@@ -1118,6 +1134,7 @@ type Mutation {
   deletePost(where: PostWhereUniqueInput!): Post
   deletePoll(where: PollWhereUniqueInput!): Poll
   deletePollOption(where: PollOptionWhereUniqueInput!): PollOption
+  deletePollOptionVote(where: PollOptionVoteWhereUniqueInput!): PollOptionVote
   upsertFile(where: FileWhereUniqueInput!, create: FileCreateInput!, update: FileUpdateInput!): File!
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
   upsertCourse(where: CourseWhereUniqueInput!, create: CourseCreateInput!, update: CourseUpdateInput!): Course!
@@ -1125,6 +1142,7 @@ type Mutation {
   upsertPost(where: PostWhereUniqueInput!, create: PostCreateInput!, update: PostUpdateInput!): Post!
   upsertPoll(where: PollWhereUniqueInput!, create: PollCreateInput!, update: PollUpdateInput!): Poll!
   upsertPollOption(where: PollOptionWhereUniqueInput!, create: PollOptionCreateInput!, update: PollOptionUpdateInput!): PollOption!
+  upsertPollOptionVote(where: PollOptionVoteWhereUniqueInput!, create: PollOptionVoteCreateInput!, update: PollOptionVoteUpdateInput!): PollOptionVote!
   updateManyFiles(data: FileUpdateInput!, where: FileWhereInput!): BatchPayload!
   updateManyUsers(data: UserUpdateInput!, where: UserWhereInput!): BatchPayload!
   updateManyCourses(data: CourseUpdateInput!, where: CourseWhereInput!): BatchPayload!
@@ -1132,6 +1150,7 @@ type Mutation {
   updateManyPosts(data: PostUpdateInput!, where: PostWhereInput!): BatchPayload!
   updateManyPolls(data: PollUpdateInput!, where: PollWhereInput!): BatchPayload!
   updateManyPollOptions(data: PollOptionUpdateInput!, where: PollOptionWhereInput!): BatchPayload!
+  updateManyPollOptionVotes(data: PollOptionVoteUpdateInput!, where: PollOptionVoteWhereInput!): BatchPayload!
   deleteManyFiles(where: FileWhereInput!): BatchPayload!
   deleteManyUsers(where: UserWhereInput!): BatchPayload!
   deleteManyCourses(where: CourseWhereInput!): BatchPayload!
@@ -1139,6 +1158,7 @@ type Mutation {
   deleteManyPosts(where: PostWhereInput!): BatchPayload!
   deleteManyPolls(where: PollWhereInput!): BatchPayload!
   deleteManyPollOptions(where: PollOptionWhereInput!): BatchPayload!
+  deleteManyPollOptionVotes(where: PollOptionVoteWhereInput!): BatchPayload!
 }
 
 enum MutationType {
@@ -1252,7 +1272,7 @@ type PollOptionConnection {
 input PollOptionCreateInput {
   name: String!
   poll: PollCreateOneWithoutOptionsInput!
-  votes: UserCreateManyWithoutVotesCastedInput
+  votes: PollOptionCreateManyWithoutVotesInput
 }
 
 input PollOptionCreateManyWithoutPollInput {
@@ -1265,9 +1285,14 @@ input PollOptionCreateManyWithoutVotesInput {
   connect: [PollOptionWhereUniqueInput!]
 }
 
+input PollOptionCreateOneWithoutVotesInput {
+  create: PollOptionCreateWithoutVotesInput
+  connect: PollOptionWhereUniqueInput
+}
+
 input PollOptionCreateWithoutPollInput {
   name: String!
-  votes: UserCreateManyWithoutVotesCastedInput
+  votes: PollOptionCreateManyWithoutVotesInput
 }
 
 input PollOptionCreateWithoutVotesInput {
@@ -1345,7 +1370,7 @@ input PollOptionSubscriptionWhereInput {
 input PollOptionUpdateInput {
   name: String
   poll: PollUpdateOneWithoutOptionsInput
-  votes: UserUpdateManyWithoutVotesCastedInput
+  votes: PollOptionUpdateManyWithoutVotesInput
 }
 
 input PollOptionUpdateManyWithoutPollInput {
@@ -1366,9 +1391,18 @@ input PollOptionUpdateManyWithoutVotesInput {
   upsert: [PollOptionUpsertWithoutVotesInput!]
 }
 
+input PollOptionUpdateOneWithoutVotesInput {
+  create: PollOptionCreateWithoutVotesInput
+  connect: PollOptionWhereUniqueInput
+  disconnect: PollOptionWhereUniqueInput
+  delete: PollOptionWhereUniqueInput
+  update: PollOptionUpdateWithoutVotesInput
+  upsert: PollOptionUpsertWithoutVotesInput
+}
+
 input PollOptionUpdateWithoutPollDataInput {
   name: String
-  votes: UserUpdateManyWithoutVotesCastedInput
+  votes: PollOptionUpdateManyWithoutVotesInput
 }
 
 input PollOptionUpdateWithoutPollInput {
@@ -1396,6 +1430,256 @@ input PollOptionUpsertWithoutVotesInput {
   where: PollOptionWhereUniqueInput!
   update: PollOptionUpdateWithoutVotesDataInput!
   create: PollOptionCreateWithoutVotesInput!
+}
+
+"""
+A connection to a list of items.
+"""
+type PollOptionVoteConnection {
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  A list of edges.
+  """
+  edges: [PollOptionVoteEdge]!
+  aggregate: AggregatePollOptionVote!
+}
+
+input PollOptionVoteCreateInput {
+  option: PollOptionCreateOneWithoutVotesInput!
+  user: UserCreateOneWithoutVotesCastedInput!
+}
+
+input PollOptionVoteCreateManyWithoutUserInput {
+  create: [PollOptionVoteCreateWithoutUserInput!]
+  connect: [PollOptionVoteWhereUniqueInput!]
+}
+
+input PollOptionVoteCreateWithoutUserInput {
+  option: PollOptionCreateOneWithoutVotesInput!
+}
+
+"""
+An edge in a connection.
+"""
+type PollOptionVoteEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: PollOptionVote!
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+}
+
+enum PollOptionVoteOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type PollOptionVotePreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PollOptionVoteSubscriptionPayload {
+  mutation: MutationType!
+  node: PollOptionVote
+  updatedFields: [String!]
+  previousValues: PollOptionVotePreviousValues
+}
+
+input PollOptionVoteSubscriptionWhereInput {
+  """
+  Logical AND on all given filters.
+  """
+  AND: [PollOptionVoteSubscriptionWhereInput!]
+  """
+  Logical OR on all given filters.
+  """
+  OR: [PollOptionVoteSubscriptionWhereInput!]
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: PollOptionVoteWhereInput
+}
+
+input PollOptionVoteUpdateInput {
+  option: PollOptionUpdateOneWithoutVotesInput
+  user: UserUpdateOneWithoutVotesCastedInput
+}
+
+input PollOptionVoteUpdateManyWithoutUserInput {
+  create: [PollOptionVoteCreateWithoutUserInput!]
+  connect: [PollOptionVoteWhereUniqueInput!]
+  disconnect: [PollOptionVoteWhereUniqueInput!]
+  delete: [PollOptionVoteWhereUniqueInput!]
+  update: [PollOptionVoteUpdateWithoutUserInput!]
+  upsert: [PollOptionVoteUpsertWithoutUserInput!]
+}
+
+input PollOptionVoteUpdateWithoutUserDataInput {
+  option: PollOptionUpdateOneWithoutVotesInput
+}
+
+input PollOptionVoteUpdateWithoutUserInput {
+  where: PollOptionVoteWhereUniqueInput!
+  data: PollOptionVoteUpdateWithoutUserDataInput!
+}
+
+input PollOptionVoteUpsertWithoutUserInput {
+  where: PollOptionVoteWhereUniqueInput!
+  update: PollOptionVoteUpdateWithoutUserDataInput!
+  create: PollOptionVoteCreateWithoutUserInput!
+}
+
+input PollOptionVoteWhereInput {
+  """
+  Logical AND on all given filters.
+  """
+  AND: [PollOptionVoteWhereInput!]
+  """
+  Logical OR on all given filters.
+  """
+  OR: [PollOptionVoteWhereInput!]
+  id: ID
+  """
+  All values that are not equal to given value.
+  """
+  id_not: ID
+  """
+  All values that are contained in given list.
+  """
+  id_in: [ID!]
+  """
+  All values that are not contained in given list.
+  """
+  id_not_in: [ID!]
+  """
+  All values less than the given value.
+  """
+  id_lt: ID
+  """
+  All values less than or equal the given value.
+  """
+  id_lte: ID
+  """
+  All values greater than the given value.
+  """
+  id_gt: ID
+  """
+  All values greater than or equal the given value.
+  """
+  id_gte: ID
+  """
+  All values containing the given string.
+  """
+  id_contains: ID
+  """
+  All values not containing the given string.
+  """
+  id_not_contains: ID
+  """
+  All values starting with the given string.
+  """
+  id_starts_with: ID
+  """
+  All values not starting with the given string.
+  """
+  id_not_starts_with: ID
+  """
+  All values ending with the given string.
+  """
+  id_ends_with: ID
+  """
+  All values not ending with the given string.
+  """
+  id_not_ends_with: ID
+  createdAt: DateTime
+  """
+  All values that are not equal to given value.
+  """
+  createdAt_not: DateTime
+  """
+  All values that are contained in given list.
+  """
+  createdAt_in: [DateTime!]
+  """
+  All values that are not contained in given list.
+  """
+  createdAt_not_in: [DateTime!]
+  """
+  All values less than the given value.
+  """
+  createdAt_lt: DateTime
+  """
+  All values less than or equal the given value.
+  """
+  createdAt_lte: DateTime
+  """
+  All values greater than the given value.
+  """
+  createdAt_gt: DateTime
+  """
+  All values greater than or equal the given value.
+  """
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  """
+  All values that are not equal to given value.
+  """
+  updatedAt_not: DateTime
+  """
+  All values that are contained in given list.
+  """
+  updatedAt_in: [DateTime!]
+  """
+  All values that are not contained in given list.
+  """
+  updatedAt_not_in: [DateTime!]
+  """
+  All values less than the given value.
+  """
+  updatedAt_lt: DateTime
+  """
+  All values less than or equal the given value.
+  """
+  updatedAt_lte: DateTime
+  """
+  All values greater than the given value.
+  """
+  updatedAt_gt: DateTime
+  """
+  All values greater than or equal the given value.
+  """
+  updatedAt_gte: DateTime
+  option: PollOptionWhereInput
+  user: UserWhereInput
+}
+
+input PollOptionVoteWhereUniqueInput {
+  id: ID
 }
 
 input PollOptionWhereInput {
@@ -1572,9 +1856,9 @@ input PollOptionWhereInput {
   """
   name_not_ends_with: String
   poll: PollWhereInput
-  votes_every: UserWhereInput
-  votes_some: UserWhereInput
-  votes_none: UserWhereInput
+  votes_every: PollOptionWhereInput
+  votes_some: PollOptionWhereInput
+  votes_none: PollOptionWhereInput
 }
 
 input PollOptionWhereUniqueInput {
@@ -1869,10 +2153,16 @@ input PostCreateInput {
   imageUrl: String
   author: UserCreateOneWithoutPostsInput!
   poll: PollCreateOneWithoutPostInput
+  likes: UserCreateManyWithoutPostsLikedInput
 }
 
 input PostCreateManyWithoutAuthorInput {
   create: [PostCreateWithoutAuthorInput!]
+  connect: [PostWhereUniqueInput!]
+}
+
+input PostCreateManyWithoutLikesInput {
+  create: [PostCreateWithoutLikesInput!]
   connect: [PostWhereUniqueInput!]
 }
 
@@ -1885,12 +2175,21 @@ input PostCreateWithoutAuthorInput {
   text: String!
   imageUrl: String
   poll: PollCreateOneWithoutPostInput
+  likes: UserCreateManyWithoutPostsLikedInput
+}
+
+input PostCreateWithoutLikesInput {
+  text: String!
+  imageUrl: String
+  author: UserCreateOneWithoutPostsInput!
+  poll: PollCreateOneWithoutPostInput
 }
 
 input PostCreateWithoutPollInput {
   text: String!
   imageUrl: String
   author: UserCreateOneWithoutPostsInput!
+  likes: UserCreateManyWithoutPostsLikedInput
 }
 
 """
@@ -1968,6 +2267,7 @@ input PostUpdateInput {
   imageUrl: String
   author: UserUpdateOneWithoutPostsInput
   poll: PollUpdateOneWithoutPostInput
+  likes: UserUpdateManyWithoutPostsLikedInput
 }
 
 input PostUpdateManyWithoutAuthorInput {
@@ -1977,6 +2277,15 @@ input PostUpdateManyWithoutAuthorInput {
   delete: [PostWhereUniqueInput!]
   update: [PostUpdateWithoutAuthorInput!]
   upsert: [PostUpsertWithoutAuthorInput!]
+}
+
+input PostUpdateManyWithoutLikesInput {
+  create: [PostCreateWithoutLikesInput!]
+  connect: [PostWhereUniqueInput!]
+  disconnect: [PostWhereUniqueInput!]
+  delete: [PostWhereUniqueInput!]
+  update: [PostUpdateWithoutLikesInput!]
+  upsert: [PostUpsertWithoutLikesInput!]
 }
 
 input PostUpdateOneWithoutPollInput {
@@ -1992,6 +2301,7 @@ input PostUpdateWithoutAuthorDataInput {
   text: String
   imageUrl: String
   poll: PollUpdateOneWithoutPostInput
+  likes: UserUpdateManyWithoutPostsLikedInput
 }
 
 input PostUpdateWithoutAuthorInput {
@@ -1999,10 +2309,23 @@ input PostUpdateWithoutAuthorInput {
   data: PostUpdateWithoutAuthorDataInput!
 }
 
+input PostUpdateWithoutLikesDataInput {
+  text: String
+  imageUrl: String
+  author: UserUpdateOneWithoutPostsInput
+  poll: PollUpdateOneWithoutPostInput
+}
+
+input PostUpdateWithoutLikesInput {
+  where: PostWhereUniqueInput!
+  data: PostUpdateWithoutLikesDataInput!
+}
+
 input PostUpdateWithoutPollDataInput {
   text: String
   imageUrl: String
   author: UserUpdateOneWithoutPostsInput
+  likes: UserUpdateManyWithoutPostsLikedInput
 }
 
 input PostUpdateWithoutPollInput {
@@ -2014,6 +2337,12 @@ input PostUpsertWithoutAuthorInput {
   where: PostWhereUniqueInput!
   update: PostUpdateWithoutAuthorDataInput!
   create: PostCreateWithoutAuthorInput!
+}
+
+input PostUpsertWithoutLikesInput {
+  where: PostWhereUniqueInput!
+  update: PostUpdateWithoutLikesDataInput!
+  create: PostCreateWithoutLikesInput!
 }
 
 input PostUpsertWithoutPollInput {
@@ -2250,6 +2579,9 @@ input PostWhereInput {
   imageUrl_not_ends_with: String
   author: UserWhereInput
   poll: PollWhereInput
+  likes_every: UserWhereInput
+  likes_some: UserWhereInput
+  likes_none: UserWhereInput
 }
 
 input PostWhereUniqueInput {
@@ -2264,6 +2596,7 @@ type Query {
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post]!
   polls(where: PollWhereInput, orderBy: PollOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Poll]!
   pollOptions(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption]!
+  pollOptionVotes(where: PollOptionVoteWhereInput, orderBy: PollOptionVoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOptionVote]!
   file(where: FileWhereUniqueInput!): File
   user(where: UserWhereUniqueInput!): User
   course(where: CourseWhereUniqueInput!): Course
@@ -2271,6 +2604,7 @@ type Query {
   post(where: PostWhereUniqueInput!): Post
   poll(where: PollWhereUniqueInput!): Poll
   pollOption(where: PollOptionWhereUniqueInput!): PollOption
+  pollOptionVote(where: PollOptionVoteWhereUniqueInput!): PollOptionVote
   filesConnection(where: FileWhereInput, orderBy: FileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): FileConnection!
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   coursesConnection(where: CourseWhereInput, orderBy: CourseOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): CourseConnection!
@@ -2278,6 +2612,7 @@ type Query {
   postsConnection(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostConnection!
   pollsConnection(where: PollWhereInput, orderBy: PollOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PollConnection!
   pollOptionsConnection(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PollOptionConnection!
+  pollOptionVotesConnection(where: PollOptionVoteWhereInput, orderBy: PollOptionVoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PollOptionVoteConnection!
   """
   Fetches an object given its ID
   """
@@ -2295,6 +2630,7 @@ type Subscription {
   post(where: PostSubscriptionWhereInput): PostSubscriptionPayload
   poll(where: PollSubscriptionWhereInput): PollSubscriptionPayload
   pollOption(where: PollOptionSubscriptionWhereInput): PollOptionSubscriptionPayload
+  pollOptionVote(where: PollOptionVoteSubscriptionWhereInput): PollOptionVoteSubscriptionPayload
 }
 
 """
@@ -2699,7 +3035,8 @@ input UserCreateInput {
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
-  votesCasted: PollOptionCreateManyWithoutVotesInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
+  postsLiked: PostCreateManyWithoutLikesInput
 }
 
 input UserCreateManyWithoutCoursesTakenInput {
@@ -2712,13 +3049,18 @@ input UserCreateManyWithoutCoursesTaughtInput {
   connect: [UserWhereUniqueInput!]
 }
 
-input UserCreateManyWithoutVotesCastedInput {
-  create: [UserCreateWithoutVotesCastedInput!]
+input UserCreateManyWithoutPostsLikedInput {
+  create: [UserCreateWithoutPostsLikedInput!]
   connect: [UserWhereUniqueInput!]
 }
 
 input UserCreateOneWithoutPostsInput {
   create: UserCreateWithoutPostsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutVotesCastedInput {
+  create: UserCreateWithoutVotesCastedInput
   connect: UserWhereUniqueInput
 }
 
@@ -2731,7 +3073,8 @@ input UserCreateWithoutCoursesTakenInput {
   imageUrl: String
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
-  votesCasted: PollOptionCreateManyWithoutVotesInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
+  postsLiked: PostCreateManyWithoutLikesInput
 }
 
 input UserCreateWithoutCoursesTaughtInput {
@@ -2743,7 +3086,8 @@ input UserCreateWithoutCoursesTaughtInput {
   imageUrl: String
   posts: PostCreateManyWithoutAuthorInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
-  votesCasted: PollOptionCreateManyWithoutVotesInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
+  postsLiked: PostCreateManyWithoutLikesInput
 }
 
 input UserCreateWithoutPostsInput {
@@ -2755,7 +3099,21 @@ input UserCreateWithoutPostsInput {
   imageUrl: String
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
-  votesCasted: PollOptionCreateManyWithoutVotesInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
+  postsLiked: PostCreateManyWithoutLikesInput
+}
+
+input UserCreateWithoutPostsLikedInput {
+  email: String!
+  password: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  imageUrl: String
+  posts: PostCreateManyWithoutAuthorInput
+  coursesTaught: CourseCreateManyWithoutInstructorsInput
+  coursesTaken: CourseCreateManyWithoutStudentsInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
 }
 
 input UserCreateWithoutVotesCastedInput {
@@ -2768,6 +3126,7 @@ input UserCreateWithoutVotesCastedInput {
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
+  postsLiked: PostCreateManyWithoutLikesInput
 }
 
 """
@@ -2862,7 +3221,8 @@ input UserUpdateInput {
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
-  votesCasted: PollOptionUpdateManyWithoutVotesInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+  postsLiked: PostUpdateManyWithoutLikesInput
 }
 
 input UserUpdateManyWithoutCoursesTakenInput {
@@ -2883,13 +3243,13 @@ input UserUpdateManyWithoutCoursesTaughtInput {
   upsert: [UserUpsertWithoutCoursesTaughtInput!]
 }
 
-input UserUpdateManyWithoutVotesCastedInput {
-  create: [UserCreateWithoutVotesCastedInput!]
+input UserUpdateManyWithoutPostsLikedInput {
+  create: [UserCreateWithoutPostsLikedInput!]
   connect: [UserWhereUniqueInput!]
   disconnect: [UserWhereUniqueInput!]
   delete: [UserWhereUniqueInput!]
-  update: [UserUpdateWithoutVotesCastedInput!]
-  upsert: [UserUpsertWithoutVotesCastedInput!]
+  update: [UserUpdateWithoutPostsLikedInput!]
+  upsert: [UserUpsertWithoutPostsLikedInput!]
 }
 
 input UserUpdateOneWithoutPostsInput {
@@ -2901,6 +3261,15 @@ input UserUpdateOneWithoutPostsInput {
   upsert: UserUpsertWithoutPostsInput
 }
 
+input UserUpdateOneWithoutVotesCastedInput {
+  create: UserCreateWithoutVotesCastedInput
+  connect: UserWhereUniqueInput
+  disconnect: UserWhereUniqueInput
+  delete: UserWhereUniqueInput
+  update: UserUpdateWithoutVotesCastedInput
+  upsert: UserUpsertWithoutVotesCastedInput
+}
+
 input UserUpdateWithoutCoursesTakenDataInput {
   email: String
   password: String
@@ -2910,7 +3279,8 @@ input UserUpdateWithoutCoursesTakenDataInput {
   imageUrl: String
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
-  votesCasted: PollOptionUpdateManyWithoutVotesInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+  postsLiked: PostUpdateManyWithoutLikesInput
 }
 
 input UserUpdateWithoutCoursesTakenInput {
@@ -2927,7 +3297,8 @@ input UserUpdateWithoutCoursesTaughtDataInput {
   imageUrl: String
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
-  votesCasted: PollOptionUpdateManyWithoutVotesInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+  postsLiked: PostUpdateManyWithoutLikesInput
 }
 
 input UserUpdateWithoutCoursesTaughtInput {
@@ -2944,12 +3315,31 @@ input UserUpdateWithoutPostsDataInput {
   imageUrl: String
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
-  votesCasted: PollOptionUpdateManyWithoutVotesInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+  postsLiked: PostUpdateManyWithoutLikesInput
 }
 
 input UserUpdateWithoutPostsInput {
   where: UserWhereUniqueInput!
   data: UserUpdateWithoutPostsDataInput!
+}
+
+input UserUpdateWithoutPostsLikedDataInput {
+  email: String
+  password: String
+  username: String
+  firstName: String
+  lastName: String
+  imageUrl: String
+  posts: PostUpdateManyWithoutAuthorInput
+  coursesTaught: CourseUpdateManyWithoutInstructorsInput
+  coursesTaken: CourseUpdateManyWithoutStudentsInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+}
+
+input UserUpdateWithoutPostsLikedInput {
+  where: UserWhereUniqueInput!
+  data: UserUpdateWithoutPostsLikedDataInput!
 }
 
 input UserUpdateWithoutVotesCastedDataInput {
@@ -2962,6 +3352,7 @@ input UserUpdateWithoutVotesCastedDataInput {
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
+  postsLiked: PostUpdateManyWithoutLikesInput
 }
 
 input UserUpdateWithoutVotesCastedInput {
@@ -2985,6 +3376,12 @@ input UserUpsertWithoutPostsInput {
   where: UserWhereUniqueInput!
   update: UserUpdateWithoutPostsDataInput!
   create: UserCreateWithoutPostsInput!
+}
+
+input UserUpsertWithoutPostsLikedInput {
+  where: UserWhereUniqueInput!
+  update: UserUpdateWithoutPostsLikedDataInput!
+  create: UserCreateWithoutPostsLikedInput!
 }
 
 input UserUpsertWithoutVotesCastedInput {
@@ -3440,9 +3837,12 @@ input UserWhereInput {
   coursesTaken_every: CourseWhereInput
   coursesTaken_some: CourseWhereInput
   coursesTaken_none: CourseWhereInput
-  votesCasted_every: PollOptionWhereInput
-  votesCasted_some: PollOptionWhereInput
-  votesCasted_none: PollOptionWhereInput
+  votesCasted_every: PollOptionVoteWhereInput
+  votesCasted_some: PollOptionVoteWhereInput
+  votesCasted_none: PollOptionVoteWhereInput
+  postsLiked_every: PostWhereInput
+  postsLiked_some: PostWhereInput
+  postsLiked_none: PostWhereInput
 }
 
 input UserWhereUniqueInput {

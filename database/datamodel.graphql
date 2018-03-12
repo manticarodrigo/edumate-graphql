@@ -21,8 +21,8 @@ type User {
   posts: [Post!]! @relation(name: "UserPosts")
   coursesTaught: [Course!]! @relation(name: "CourseInstructors")
   coursesTaken: [Course!]! @relation(name: "CourseStudents")
-  votesCasted: [PollOption!]! @relation(name: "PollOptionVotes")
-  postsLikes: [Post] @relation(name: "PostLikes")
+  votesCasted: [PollOptionVote!]! @relation(name: "UserVotes")
+  postsLiked: [Post!]! @relation(name: "PostLikes")
 }
 
 type Course {
@@ -55,7 +55,7 @@ type Post {
   text: String!
   imageUrl: String
   poll: Poll @relation(name: "PostPoll")
-  likes: [User] @relation(name: "PostLikes")
+  likes: [User!]! @relation(name: "PostLikes")
 }
 
 type Poll {
@@ -71,7 +71,15 @@ type PollOption {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
-  poll: Poll! @relation(name: "PollOptions")
   name: String!
-  votes: [User!]! @relation(name: "PollOptionVotes")
+  poll: Poll! @relation(name: "PollOptions")
+  votes: [PollOptionVote!]! @relation(name: "PollOptionVotes")
+}
+
+type PollOptionVote {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  option: PollOption! @relation(name: "PollOptionVotes")
+  user: User! @relation(name: "UserVotes")
 }
