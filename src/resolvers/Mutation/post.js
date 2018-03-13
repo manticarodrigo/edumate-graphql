@@ -3,11 +3,9 @@ const { processUpload } = require('../../modules/fileApi')
 
 const post = {
   async createPost(parent, { text, files, pollOptions }, ctx, info) {
-    console.log('processing post')
     const userId = getUserId(ctx)
-    const images = files ? { create: await Promise.all(files.map(file => processUpload(file, ctx))) } : null
-    const poll = pollOptions ? { create: { options: { create: pollOptions.map(option => { return { name: option } }) } } } : null
-    console.log(poll)
+    const images = files && files.length > 0 ? { create: await Promise.all(files.map(file => processUpload(file, ctx))) } : null
+    const poll = pollOptions && pollOptions.length > 0 ? { create: { options: { create: pollOptions.map(option => { return { name: option } }) } } } : null
     return ctx.db.mutation.createPost({
       data: {
         text,

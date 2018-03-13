@@ -11,8 +11,6 @@ const s3 = new aws.S3({
 })
 
 exports.processUpload = async ( file, ctx ) => {
-  console.log('processing upload')
-
   if (!file) {
     return console.log('ERROR: No file received.')
   }
@@ -30,7 +28,7 @@ exports.processUpload = async ( file, ctx ) => {
 
   const url = response.Location
 
-  // Prisma data
+  // File data
   const data = {
     filename,
     mimetype,

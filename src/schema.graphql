@@ -1,4 +1,4 @@
-# import ID, File, Post, Poll, PollOption from "./generated/prisma.graphql"
+# import ID, File, Post, Poll, PollOption, PollOptionVote from "./generated/prisma.graphql"
 
 scalar Upload
 
@@ -30,5 +30,5 @@ type User {
   firstName: String!
   lastName: String!
   imageUrl: String
-  votesCasted: [PollOption]
+  votesCasted: [PollOptionVote]
 }
