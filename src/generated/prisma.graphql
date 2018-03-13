@@ -25,6 +25,7 @@ type File implements Node {
   mimetype: String!
   encoding: String!
   url: String!
+  post(where: PostWhereInput): Post
 }
 
 type Poll implements Node {
@@ -42,7 +43,7 @@ type PollOption implements Node {
   updatedAt: DateTime!
   name: String!
   poll(where: PollWhereInput): Poll!
-  votes(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption!]
+  votes(where: PollOptionVoteWhereInput, orderBy: PollOptionVoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOptionVote!]
 }
 
 type PollOptionVote implements Node {
@@ -59,7 +60,7 @@ type Post implements Node {
   updatedAt: DateTime!
   author(where: UserWhereInput): User!
   text: String!
-  imageUrl: String
+  images(where: FileWhereInput, orderBy: FileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [File!]
   poll(where: PollWhereInput): Poll
   likes(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
 }
@@ -680,6 +681,19 @@ input FileCreateInput {
   mimetype: String!
   encoding: String!
   url: String!
+  post: PostCreateOneWithoutImagesInput
+}
+
+input FileCreateManyWithoutPostInput {
+  create: [FileCreateWithoutPostInput!]
+  connect: [FileWhereUniqueInput!]
+}
+
+input FileCreateWithoutPostInput {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+  url: String!
 }
 
 """
@@ -763,6 +777,34 @@ input FileUpdateInput {
   mimetype: String
   encoding: String
   url: String
+  post: PostUpdateOneWithoutImagesInput
+}
+
+input FileUpdateManyWithoutPostInput {
+  create: [FileCreateWithoutPostInput!]
+  connect: [FileWhereUniqueInput!]
+  disconnect: [FileWhereUniqueInput!]
+  delete: [FileWhereUniqueInput!]
+  update: [FileUpdateWithoutPostInput!]
+  upsert: [FileUpsertWithoutPostInput!]
+}
+
+input FileUpdateWithoutPostDataInput {
+  filename: String
+  mimetype: String
+  encoding: String
+  url: String
+}
+
+input FileUpdateWithoutPostInput {
+  where: FileWhereUniqueInput!
+  data: FileUpdateWithoutPostDataInput!
+}
+
+input FileUpsertWithoutPostInput {
+  where: FileWhereUniqueInput!
+  update: FileUpdateWithoutPostDataInput!
+  create: FileCreateWithoutPostInput!
 }
 
 input FileWhereInput {
@@ -1097,6 +1139,7 @@ input FileWhereInput {
   All values not ending with the given string.
   """
   url_not_ends_with: String
+  post: PostWhereInput
 }
 
 input FileWhereUniqueInput {
@@ -1272,16 +1315,11 @@ type PollOptionConnection {
 input PollOptionCreateInput {
   name: String!
   poll: PollCreateOneWithoutOptionsInput!
-  votes: PollOptionCreateManyWithoutVotesInput
+  votes: PollOptionVoteCreateManyWithoutOptionInput
 }
 
 input PollOptionCreateManyWithoutPollInput {
   create: [PollOptionCreateWithoutPollInput!]
-  connect: [PollOptionWhereUniqueInput!]
-}
-
-input PollOptionCreateManyWithoutVotesInput {
-  create: [PollOptionCreateWithoutVotesInput!]
   connect: [PollOptionWhereUniqueInput!]
 }
 
@@ -1292,7 +1330,7 @@ input PollOptionCreateOneWithoutVotesInput {
 
 input PollOptionCreateWithoutPollInput {
   name: String!
-  votes: PollOptionCreateManyWithoutVotesInput
+  votes: PollOptionVoteCreateManyWithoutOptionInput
 }
 
 input PollOptionCreateWithoutVotesInput {
@@ -1370,7 +1408,7 @@ input PollOptionSubscriptionWhereInput {
 input PollOptionUpdateInput {
   name: String
   poll: PollUpdateOneWithoutOptionsInput
-  votes: PollOptionUpdateManyWithoutVotesInput
+  votes: PollOptionVoteUpdateManyWithoutOptionInput
 }
 
 input PollOptionUpdateManyWithoutPollInput {
@@ -1380,15 +1418,6 @@ input PollOptionUpdateManyWithoutPollInput {
   delete: [PollOptionWhereUniqueInput!]
   update: [PollOptionUpdateWithoutPollInput!]
   upsert: [PollOptionUpsertWithoutPollInput!]
-}
-
-input PollOptionUpdateManyWithoutVotesInput {
-  create: [PollOptionCreateWithoutVotesInput!]
-  connect: [PollOptionWhereUniqueInput!]
-  disconnect: [PollOptionWhereUniqueInput!]
-  delete: [PollOptionWhereUniqueInput!]
-  update: [PollOptionUpdateWithoutVotesInput!]
-  upsert: [PollOptionUpsertWithoutVotesInput!]
 }
 
 input PollOptionUpdateOneWithoutVotesInput {
@@ -1402,7 +1431,7 @@ input PollOptionUpdateOneWithoutVotesInput {
 
 input PollOptionUpdateWithoutPollDataInput {
   name: String
-  votes: PollOptionUpdateManyWithoutVotesInput
+  votes: PollOptionVoteUpdateManyWithoutOptionInput
 }
 
 input PollOptionUpdateWithoutPollInput {
@@ -1452,9 +1481,18 @@ input PollOptionVoteCreateInput {
   user: UserCreateOneWithoutVotesCastedInput!
 }
 
+input PollOptionVoteCreateManyWithoutOptionInput {
+  create: [PollOptionVoteCreateWithoutOptionInput!]
+  connect: [PollOptionVoteWhereUniqueInput!]
+}
+
 input PollOptionVoteCreateManyWithoutUserInput {
   create: [PollOptionVoteCreateWithoutUserInput!]
   connect: [PollOptionVoteWhereUniqueInput!]
+}
+
+input PollOptionVoteCreateWithoutOptionInput {
+  user: UserCreateOneWithoutVotesCastedInput!
 }
 
 input PollOptionVoteCreateWithoutUserInput {
@@ -1530,6 +1568,15 @@ input PollOptionVoteUpdateInput {
   user: UserUpdateOneWithoutVotesCastedInput
 }
 
+input PollOptionVoteUpdateManyWithoutOptionInput {
+  create: [PollOptionVoteCreateWithoutOptionInput!]
+  connect: [PollOptionVoteWhereUniqueInput!]
+  disconnect: [PollOptionVoteWhereUniqueInput!]
+  delete: [PollOptionVoteWhereUniqueInput!]
+  update: [PollOptionVoteUpdateWithoutOptionInput!]
+  upsert: [PollOptionVoteUpsertWithoutOptionInput!]
+}
+
 input PollOptionVoteUpdateManyWithoutUserInput {
   create: [PollOptionVoteCreateWithoutUserInput!]
   connect: [PollOptionVoteWhereUniqueInput!]
@@ -1539,6 +1586,15 @@ input PollOptionVoteUpdateManyWithoutUserInput {
   upsert: [PollOptionVoteUpsertWithoutUserInput!]
 }
 
+input PollOptionVoteUpdateWithoutOptionDataInput {
+  user: UserUpdateOneWithoutVotesCastedInput
+}
+
+input PollOptionVoteUpdateWithoutOptionInput {
+  where: PollOptionVoteWhereUniqueInput!
+  data: PollOptionVoteUpdateWithoutOptionDataInput!
+}
+
 input PollOptionVoteUpdateWithoutUserDataInput {
   option: PollOptionUpdateOneWithoutVotesInput
 }
@@ -1546,6 +1602,12 @@ input PollOptionVoteUpdateWithoutUserDataInput {
 input PollOptionVoteUpdateWithoutUserInput {
   where: PollOptionVoteWhereUniqueInput!
   data: PollOptionVoteUpdateWithoutUserDataInput!
+}
+
+input PollOptionVoteUpsertWithoutOptionInput {
+  where: PollOptionVoteWhereUniqueInput!
+  update: PollOptionVoteUpdateWithoutOptionDataInput!
+  create: PollOptionVoteCreateWithoutOptionInput!
 }
 
 input PollOptionVoteUpsertWithoutUserInput {
@@ -1856,9 +1918,9 @@ input PollOptionWhereInput {
   """
   name_not_ends_with: String
   poll: PollWhereInput
-  votes_every: PollOptionWhereInput
-  votes_some: PollOptionWhereInput
-  votes_none: PollOptionWhereInput
+  votes_every: PollOptionVoteWhereInput
+  votes_some: PollOptionVoteWhereInput
+  votes_none: PollOptionVoteWhereInput
 }
 
 input PollOptionWhereUniqueInput {
@@ -2150,8 +2212,8 @@ type PostConnection {
 
 input PostCreateInput {
   text: String!
-  imageUrl: String
   author: UserCreateOneWithoutPostsInput!
+  images: FileCreateManyWithoutPostInput
   poll: PollCreateOneWithoutPostInput
   likes: UserCreateManyWithoutPostsLikedInput
 }
@@ -2166,6 +2228,11 @@ input PostCreateManyWithoutLikesInput {
   connect: [PostWhereUniqueInput!]
 }
 
+input PostCreateOneWithoutImagesInput {
+  create: PostCreateWithoutImagesInput
+  connect: PostWhereUniqueInput
+}
+
 input PostCreateOneWithoutPollInput {
   create: PostCreateWithoutPollInput
   connect: PostWhereUniqueInput
@@ -2173,22 +2240,29 @@ input PostCreateOneWithoutPollInput {
 
 input PostCreateWithoutAuthorInput {
   text: String!
-  imageUrl: String
+  images: FileCreateManyWithoutPostInput
+  poll: PollCreateOneWithoutPostInput
+  likes: UserCreateManyWithoutPostsLikedInput
+}
+
+input PostCreateWithoutImagesInput {
+  text: String!
+  author: UserCreateOneWithoutPostsInput!
   poll: PollCreateOneWithoutPostInput
   likes: UserCreateManyWithoutPostsLikedInput
 }
 
 input PostCreateWithoutLikesInput {
   text: String!
-  imageUrl: String
   author: UserCreateOneWithoutPostsInput!
+  images: FileCreateManyWithoutPostInput
   poll: PollCreateOneWithoutPostInput
 }
 
 input PostCreateWithoutPollInput {
   text: String!
-  imageUrl: String
   author: UserCreateOneWithoutPostsInput!
+  images: FileCreateManyWithoutPostInput
   likes: UserCreateManyWithoutPostsLikedInput
 }
 
@@ -2215,8 +2289,6 @@ enum PostOrderByInput {
   updatedAt_DESC
   text_ASC
   text_DESC
-  imageUrl_ASC
-  imageUrl_DESC
 }
 
 type PostPreviousValues {
@@ -2224,7 +2296,6 @@ type PostPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   text: String!
-  imageUrl: String
 }
 
 type PostSubscriptionPayload {
@@ -2264,8 +2335,8 @@ input PostSubscriptionWhereInput {
 
 input PostUpdateInput {
   text: String
-  imageUrl: String
   author: UserUpdateOneWithoutPostsInput
+  images: FileUpdateManyWithoutPostInput
   poll: PollUpdateOneWithoutPostInput
   likes: UserUpdateManyWithoutPostsLikedInput
 }
@@ -2288,6 +2359,15 @@ input PostUpdateManyWithoutLikesInput {
   upsert: [PostUpsertWithoutLikesInput!]
 }
 
+input PostUpdateOneWithoutImagesInput {
+  create: PostCreateWithoutImagesInput
+  connect: PostWhereUniqueInput
+  disconnect: PostWhereUniqueInput
+  delete: PostWhereUniqueInput
+  update: PostUpdateWithoutImagesInput
+  upsert: PostUpsertWithoutImagesInput
+}
+
 input PostUpdateOneWithoutPollInput {
   create: PostCreateWithoutPollInput
   connect: PostWhereUniqueInput
@@ -2299,7 +2379,7 @@ input PostUpdateOneWithoutPollInput {
 
 input PostUpdateWithoutAuthorDataInput {
   text: String
-  imageUrl: String
+  images: FileUpdateManyWithoutPostInput
   poll: PollUpdateOneWithoutPostInput
   likes: UserUpdateManyWithoutPostsLikedInput
 }
@@ -2309,10 +2389,22 @@ input PostUpdateWithoutAuthorInput {
   data: PostUpdateWithoutAuthorDataInput!
 }
 
+input PostUpdateWithoutImagesDataInput {
+  text: String
+  author: UserUpdateOneWithoutPostsInput
+  poll: PollUpdateOneWithoutPostInput
+  likes: UserUpdateManyWithoutPostsLikedInput
+}
+
+input PostUpdateWithoutImagesInput {
+  where: PostWhereUniqueInput!
+  data: PostUpdateWithoutImagesDataInput!
+}
+
 input PostUpdateWithoutLikesDataInput {
   text: String
-  imageUrl: String
   author: UserUpdateOneWithoutPostsInput
+  images: FileUpdateManyWithoutPostInput
   poll: PollUpdateOneWithoutPostInput
 }
 
@@ -2323,8 +2415,8 @@ input PostUpdateWithoutLikesInput {
 
 input PostUpdateWithoutPollDataInput {
   text: String
-  imageUrl: String
   author: UserUpdateOneWithoutPostsInput
+  images: FileUpdateManyWithoutPostInput
   likes: UserUpdateManyWithoutPostsLikedInput
 }
 
@@ -2337,6 +2429,12 @@ input PostUpsertWithoutAuthorInput {
   where: PostWhereUniqueInput!
   update: PostUpdateWithoutAuthorDataInput!
   create: PostCreateWithoutAuthorInput!
+}
+
+input PostUpsertWithoutImagesInput {
+  where: PostWhereUniqueInput!
+  update: PostUpdateWithoutImagesDataInput!
+  create: PostCreateWithoutImagesInput!
 }
 
 input PostUpsertWithoutLikesInput {
@@ -2524,60 +2622,10 @@ input PostWhereInput {
   All values not ending with the given string.
   """
   text_not_ends_with: String
-  imageUrl: String
-  """
-  All values that are not equal to given value.
-  """
-  imageUrl_not: String
-  """
-  All values that are contained in given list.
-  """
-  imageUrl_in: [String!]
-  """
-  All values that are not contained in given list.
-  """
-  imageUrl_not_in: [String!]
-  """
-  All values less than the given value.
-  """
-  imageUrl_lt: String
-  """
-  All values less than or equal the given value.
-  """
-  imageUrl_lte: String
-  """
-  All values greater than the given value.
-  """
-  imageUrl_gt: String
-  """
-  All values greater than or equal the given value.
-  """
-  imageUrl_gte: String
-  """
-  All values containing the given string.
-  """
-  imageUrl_contains: String
-  """
-  All values not containing the given string.
-  """
-  imageUrl_not_contains: String
-  """
-  All values starting with the given string.
-  """
-  imageUrl_starts_with: String
-  """
-  All values not starting with the given string.
-  """
-  imageUrl_not_starts_with: String
-  """
-  All values ending with the given string.
-  """
-  imageUrl_ends_with: String
-  """
-  All values not ending with the given string.
-  """
-  imageUrl_not_ends_with: String
   author: UserWhereInput
+  images_every: FileWhereInput
+  images_some: FileWhereInput
+  images_none: FileWhereInput
   poll: PollWhereInput
   likes_every: UserWhereInput
   likes_some: UserWhereInput

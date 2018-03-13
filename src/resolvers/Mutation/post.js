@@ -2,41 +2,22 @@ const { getUserId } = require('../../utils')
 const { processUpload } = require('../../modules/fileApi')
 
 const post = {
-  async createPost(parent, { text, images, poll }, ctx, info) {
+  async createPost(parent, { text, files, pollOptions }, ctx, info) {
+    console.log('processing post')
     const userId = getUserId(ctx)
-    console.log('received mutation')
-    if (images) {
-      const image = images[0]
-      return await processUpload(image, ctx)
-      .then(image => {
-        console.log(image)
-        const imageUrl = image.url
-        return ctx.db.mutation.createPost({
-          data: {
-            text,
-            imageUrl,
-            poll,
-            author: {
-              connect: {
-                id: userId
-              },
-            },
-          },
-        }, info)
-      })
-    } else {
-      return ctx.db.mutation.createPost({
-        data: {
-          text,
-          poll,
-          author: {
-            connect: {
-              id: userId
-            },
-          },
+    const images = files ? { create: await Promise.all(files.map(file => processUpload(file, ctx))) } : null
+    const poll = pollOptions ? { create: { options: { create: pollOptions.map(option => { return { name: option } }) } } } : null
+    console.log(poll)
+    return ctx.db.mutation.createPost({
+      data: {
+        text,
+        images,
+        poll,
+        author: { connect: { id: userId },
         },
-      }, info)
-    }
+      },
+    }, info)
+    return null
   },
 
   async deletePost(parent, { id }, ctx, info) {

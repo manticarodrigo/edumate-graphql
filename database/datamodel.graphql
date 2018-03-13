@@ -6,6 +6,7 @@ type File {
   mimetype: String!
   encoding: String!
   url: String! @unique
+  post: Post @relation(name: "PostFiles")
 }
 
 type User {
@@ -53,7 +54,7 @@ type Post {
   updatedAt: DateTime!
   author: User! @relation(name: "UserPosts")
   text: String!
-  imageUrl: String
+  images: [File!]! @relation(name: "PostFiles")
   poll: Poll @relation(name: "PostPoll")
   likes: [User!]! @relation(name: "PostLikes")
 }

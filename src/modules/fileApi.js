@@ -10,12 +10,14 @@ const s3 = new aws.S3({
   endpoint: new aws.Endpoint('http://localhost:4569')
 })
 
-exports.processUpload = async ( upload, ctx ) => {
-  if (!upload) {
+exports.processUpload = async ( file, ctx ) => {
+  console.log('processing upload')
+
+  if (!file) {
     return console.log('ERROR: No file received.')
   }
   
-  const { stream, filename, mimetype, encoding } = await upload
+  const { stream, filename, mimetype, encoding } = await file
   const key = uuid() + '-' + filename
 
   // Upload to S3
@@ -28,7 +30,7 @@ exports.processUpload = async ( upload, ctx ) => {
 
   const url = response.Location
 
-  // Sync with Prisma
+  // Prisma data
   const data = {
     filename,
     mimetype,
@@ -36,18 +38,5 @@ exports.processUpload = async ( upload, ctx ) => {
     url,
   }
 
-  const { id } = await ctx.db.mutation.createFile({ data }, ` { id } `)
-
-  const file = {
-    id,
-    filename,
-    mimetype,
-    encoding,
-    url,
-  }
-
-  console.log('saved prisma file:')
-  console.log(file)
-
-  return file
+  return data
 }
