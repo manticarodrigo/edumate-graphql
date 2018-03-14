@@ -6,6 +6,8 @@ type File {
   mimetype: String!
   encoding: String!
   url: String! @unique
+  user: User @relation(name: "UserImage")
+  course: Course @relation(name: "CourseImage")
   post: Post @relation(name: "PostFiles")
 }
 
@@ -18,7 +20,7 @@ type User {
   username: String! @unique
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: File @relation(name: "UserImage")
   posts: [Post!]! @relation(name: "UserPosts")
   coursesTaught: [Course!]! @relation(name: "CourseInstructors")
   coursesTaken: [Course!]! @relation(name: "CourseStudents")
@@ -32,7 +34,7 @@ type Course {
   updatedAt: DateTime!
   name: String!
   description: String!
-  imageUrl: String
+  image: File @relation(name: "CourseImage")
   instructors: [User!]! @relation(name: "CourseInstructors")
   students: [User!]! @relation(name: "CourseStudents")
   tasks: [Task!]! @relation(name: "CourseTasks")

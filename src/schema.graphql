@@ -29,6 +29,6 @@ type User {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: File
   votesCasted: [PollOptionVote]
 }

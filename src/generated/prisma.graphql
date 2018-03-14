@@ -11,7 +11,7 @@ type Course implements Node {
   updatedAt: DateTime!
   name: String!
   description: String!
-  imageUrl: String
+  image(where: FileWhereInput): File
   instructors(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
   students(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User!]
   tasks(where: TaskWhereInput, orderBy: TaskOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Task!]
@@ -25,6 +25,8 @@ type File implements Node {
   mimetype: String!
   encoding: String!
   url: String!
+  user(where: UserWhereInput): User
+  course(where: CourseWhereInput): Course
   post(where: PostWhereInput): Post
 }
 
@@ -84,7 +86,7 @@ type User implements Node {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image(where: FileWhereInput): File
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
   coursesTaught(where: CourseWhereInput, orderBy: CourseOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Course!]
   coursesTaken(where: CourseWhereInput, orderBy: CourseOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Course!]
@@ -154,7 +156,7 @@ type CourseConnection {
 input CourseCreateInput {
   name: String!
   description: String!
-  imageUrl: String
+  image: FileCreateOneWithoutCourseInput
   instructors: UserCreateManyWithoutCoursesTaughtInput
   students: UserCreateManyWithoutCoursesTakenInput
   tasks: TaskCreateManyWithoutCourseInput
@@ -170,15 +172,28 @@ input CourseCreateManyWithoutStudentsInput {
   connect: [CourseWhereUniqueInput!]
 }
 
+input CourseCreateOneWithoutImageInput {
+  create: CourseCreateWithoutImageInput
+  connect: CourseWhereUniqueInput
+}
+
 input CourseCreateOneWithoutTasksInput {
   create: CourseCreateWithoutTasksInput
   connect: CourseWhereUniqueInput
 }
 
+input CourseCreateWithoutImageInput {
+  name: String!
+  description: String!
+  instructors: UserCreateManyWithoutCoursesTaughtInput
+  students: UserCreateManyWithoutCoursesTakenInput
+  tasks: TaskCreateManyWithoutCourseInput
+}
+
 input CourseCreateWithoutInstructorsInput {
   name: String!
   description: String!
-  imageUrl: String
+  image: FileCreateOneWithoutCourseInput
   students: UserCreateManyWithoutCoursesTakenInput
   tasks: TaskCreateManyWithoutCourseInput
 }
@@ -186,7 +201,7 @@ input CourseCreateWithoutInstructorsInput {
 input CourseCreateWithoutStudentsInput {
   name: String!
   description: String!
-  imageUrl: String
+  image: FileCreateOneWithoutCourseInput
   instructors: UserCreateManyWithoutCoursesTaughtInput
   tasks: TaskCreateManyWithoutCourseInput
 }
@@ -194,7 +209,7 @@ input CourseCreateWithoutStudentsInput {
 input CourseCreateWithoutTasksInput {
   name: String!
   description: String!
-  imageUrl: String
+  image: FileCreateOneWithoutCourseInput
   instructors: UserCreateManyWithoutCoursesTaughtInput
   students: UserCreateManyWithoutCoursesTakenInput
 }
@@ -224,8 +239,6 @@ enum CourseOrderByInput {
   name_DESC
   description_ASC
   description_DESC
-  imageUrl_ASC
-  imageUrl_DESC
 }
 
 type CoursePreviousValues {
@@ -234,7 +247,6 @@ type CoursePreviousValues {
   updatedAt: DateTime!
   name: String!
   description: String!
-  imageUrl: String
 }
 
 type CourseSubscriptionPayload {
@@ -275,7 +287,7 @@ input CourseSubscriptionWhereInput {
 input CourseUpdateInput {
   name: String
   description: String
-  imageUrl: String
+  image: FileUpdateOneWithoutCourseInput
   instructors: UserUpdateManyWithoutCoursesTaughtInput
   students: UserUpdateManyWithoutCoursesTakenInput
   tasks: TaskUpdateManyWithoutCourseInput
@@ -299,6 +311,15 @@ input CourseUpdateManyWithoutStudentsInput {
   upsert: [CourseUpsertWithWhereUniqueWithoutStudentsInput!]
 }
 
+input CourseUpdateOneWithoutImageInput {
+  create: CourseCreateWithoutImageInput
+  connect: CourseWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: CourseUpdateWithoutImageDataInput
+  upsert: CourseUpsertWithoutImageInput
+}
+
 input CourseUpdateOneWithoutTasksInput {
   create: CourseCreateWithoutTasksInput
   connect: CourseWhereUniqueInput
@@ -308,10 +329,18 @@ input CourseUpdateOneWithoutTasksInput {
   upsert: CourseUpsertWithoutTasksInput
 }
 
+input CourseUpdateWithoutImageDataInput {
+  name: String
+  description: String
+  instructors: UserUpdateManyWithoutCoursesTaughtInput
+  students: UserUpdateManyWithoutCoursesTakenInput
+  tasks: TaskUpdateManyWithoutCourseInput
+}
+
 input CourseUpdateWithoutInstructorsDataInput {
   name: String
   description: String
-  imageUrl: String
+  image: FileUpdateOneWithoutCourseInput
   students: UserUpdateManyWithoutCoursesTakenInput
   tasks: TaskUpdateManyWithoutCourseInput
 }
@@ -319,7 +348,7 @@ input CourseUpdateWithoutInstructorsDataInput {
 input CourseUpdateWithoutStudentsDataInput {
   name: String
   description: String
-  imageUrl: String
+  image: FileUpdateOneWithoutCourseInput
   instructors: UserUpdateManyWithoutCoursesTaughtInput
   tasks: TaskUpdateManyWithoutCourseInput
 }
@@ -327,7 +356,7 @@ input CourseUpdateWithoutStudentsDataInput {
 input CourseUpdateWithoutTasksDataInput {
   name: String
   description: String
-  imageUrl: String
+  image: FileUpdateOneWithoutCourseInput
   instructors: UserUpdateManyWithoutCoursesTaughtInput
   students: UserUpdateManyWithoutCoursesTakenInput
 }
@@ -340,6 +369,11 @@ input CourseUpdateWithWhereUniqueWithoutInstructorsInput {
 input CourseUpdateWithWhereUniqueWithoutStudentsInput {
   where: CourseWhereUniqueInput!
   data: CourseUpdateWithoutStudentsDataInput!
+}
+
+input CourseUpsertWithoutImageInput {
+  update: CourseUpdateWithoutImageDataInput!
+  create: CourseCreateWithoutImageInput!
 }
 
 input CourseUpsertWithoutTasksInput {
@@ -585,59 +619,7 @@ input CourseWhereInput {
   All values not ending with the given string.
   """
   description_not_ends_with: String
-  imageUrl: String
-  """
-  All values that are not equal to given value.
-  """
-  imageUrl_not: String
-  """
-  All values that are contained in given list.
-  """
-  imageUrl_in: [String!]
-  """
-  All values that are not contained in given list.
-  """
-  imageUrl_not_in: [String!]
-  """
-  All values less than the given value.
-  """
-  imageUrl_lt: String
-  """
-  All values less than or equal the given value.
-  """
-  imageUrl_lte: String
-  """
-  All values greater than the given value.
-  """
-  imageUrl_gt: String
-  """
-  All values greater than or equal the given value.
-  """
-  imageUrl_gte: String
-  """
-  All values containing the given string.
-  """
-  imageUrl_contains: String
-  """
-  All values not containing the given string.
-  """
-  imageUrl_not_contains: String
-  """
-  All values starting with the given string.
-  """
-  imageUrl_starts_with: String
-  """
-  All values not starting with the given string.
-  """
-  imageUrl_not_starts_with: String
-  """
-  All values ending with the given string.
-  """
-  imageUrl_ends_with: String
-  """
-  All values not ending with the given string.
-  """
-  imageUrl_not_ends_with: String
+  image: FileWhereInput
   instructors_every: UserWhereInput
   instructors_some: UserWhereInput
   instructors_none: UserWhereInput
@@ -675,6 +657,8 @@ input FileCreateInput {
   mimetype: String!
   encoding: String!
   url: String!
+  user: UserCreateOneWithoutImageInput
+  course: CourseCreateOneWithoutImageInput
   post: PostCreateOneWithoutImagesInput
 }
 
@@ -683,11 +667,41 @@ input FileCreateManyWithoutPostInput {
   connect: [FileWhereUniqueInput!]
 }
 
+input FileCreateOneWithoutCourseInput {
+  create: FileCreateWithoutCourseInput
+  connect: FileWhereUniqueInput
+}
+
+input FileCreateOneWithoutUserInput {
+  create: FileCreateWithoutUserInput
+  connect: FileWhereUniqueInput
+}
+
+input FileCreateWithoutCourseInput {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+  url: String!
+  user: UserCreateOneWithoutImageInput
+  post: PostCreateOneWithoutImagesInput
+}
+
 input FileCreateWithoutPostInput {
   filename: String!
   mimetype: String!
   encoding: String!
   url: String!
+  user: UserCreateOneWithoutImageInput
+  course: CourseCreateOneWithoutImageInput
+}
+
+input FileCreateWithoutUserInput {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+  url: String!
+  course: CourseCreateOneWithoutImageInput
+  post: PostCreateOneWithoutImagesInput
 }
 
 """
@@ -771,6 +785,8 @@ input FileUpdateInput {
   mimetype: String
   encoding: String
   url: String
+  user: UserUpdateOneWithoutImageInput
+  course: CourseUpdateOneWithoutImageInput
   post: PostUpdateOneWithoutImagesInput
 }
 
@@ -783,16 +799,64 @@ input FileUpdateManyWithoutPostInput {
   upsert: [FileUpsertWithWhereUniqueWithoutPostInput!]
 }
 
+input FileUpdateOneWithoutCourseInput {
+  create: FileCreateWithoutCourseInput
+  connect: FileWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: FileUpdateWithoutCourseDataInput
+  upsert: FileUpsertWithoutCourseInput
+}
+
+input FileUpdateOneWithoutUserInput {
+  create: FileCreateWithoutUserInput
+  connect: FileWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: FileUpdateWithoutUserDataInput
+  upsert: FileUpsertWithoutUserInput
+}
+
+input FileUpdateWithoutCourseDataInput {
+  filename: String
+  mimetype: String
+  encoding: String
+  url: String
+  user: UserUpdateOneWithoutImageInput
+  post: PostUpdateOneWithoutImagesInput
+}
+
 input FileUpdateWithoutPostDataInput {
   filename: String
   mimetype: String
   encoding: String
   url: String
+  user: UserUpdateOneWithoutImageInput
+  course: CourseUpdateOneWithoutImageInput
+}
+
+input FileUpdateWithoutUserDataInput {
+  filename: String
+  mimetype: String
+  encoding: String
+  url: String
+  course: CourseUpdateOneWithoutImageInput
+  post: PostUpdateOneWithoutImagesInput
 }
 
 input FileUpdateWithWhereUniqueWithoutPostInput {
   where: FileWhereUniqueInput!
   data: FileUpdateWithoutPostDataInput!
+}
+
+input FileUpsertWithoutCourseInput {
+  update: FileUpdateWithoutCourseDataInput!
+  create: FileCreateWithoutCourseInput!
+}
+
+input FileUpsertWithoutUserInput {
+  update: FileUpdateWithoutUserDataInput!
+  create: FileCreateWithoutUserInput!
 }
 
 input FileUpsertWithWhereUniqueWithoutPostInput {
@@ -1133,6 +1197,8 @@ input FileWhereInput {
   All values not ending with the given string.
   """
   url_not_ends_with: String
+  user: UserWhereInput
+  course: CourseWhereInput
   post: PostWhereInput
 }
 
@@ -3040,7 +3106,7 @@ input UserCreateInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
@@ -3063,6 +3129,11 @@ input UserCreateManyWithoutPostsLikedInput {
   connect: [UserWhereUniqueInput!]
 }
 
+input UserCreateOneWithoutImageInput {
+  create: UserCreateWithoutImageInput
+  connect: UserWhereUniqueInput
+}
+
 input UserCreateOneWithoutPostsInput {
   create: UserCreateWithoutPostsInput
   connect: UserWhereUniqueInput
@@ -3079,7 +3150,7 @@ input UserCreateWithoutCoursesTakenInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   votesCasted: PollOptionVoteCreateManyWithoutUserInput
@@ -3092,8 +3163,21 @@ input UserCreateWithoutCoursesTaughtInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutAuthorInput
+  coursesTaken: CourseCreateManyWithoutStudentsInput
+  votesCasted: PollOptionVoteCreateManyWithoutUserInput
+  postsLiked: PostCreateManyWithoutLikesInput
+}
+
+input UserCreateWithoutImageInput {
+  email: String!
+  password: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  posts: PostCreateManyWithoutAuthorInput
+  coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
   votesCasted: PollOptionVoteCreateManyWithoutUserInput
   postsLiked: PostCreateManyWithoutLikesInput
@@ -3105,7 +3189,7 @@ input UserCreateWithoutPostsInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
   votesCasted: PollOptionVoteCreateManyWithoutUserInput
@@ -3118,7 +3202,7 @@ input UserCreateWithoutPostsLikedInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
@@ -3131,7 +3215,7 @@ input UserCreateWithoutVotesCastedInput {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
+  image: FileCreateOneWithoutUserInput
   posts: PostCreateManyWithoutAuthorInput
   coursesTaught: CourseCreateManyWithoutInstructorsInput
   coursesTaken: CourseCreateManyWithoutStudentsInput
@@ -3169,8 +3253,6 @@ enum UserOrderByInput {
   firstName_DESC
   lastName_ASC
   lastName_DESC
-  imageUrl_ASC
-  imageUrl_DESC
 }
 
 type UserPreviousValues {
@@ -3182,7 +3264,6 @@ type UserPreviousValues {
   username: String!
   firstName: String!
   lastName: String!
-  imageUrl: String
 }
 
 type UserSubscriptionPayload {
@@ -3226,7 +3307,7 @@ input UserUpdateInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
@@ -3261,6 +3342,15 @@ input UserUpdateManyWithoutPostsLikedInput {
   upsert: [UserUpsertWithWhereUniqueWithoutPostsLikedInput!]
 }
 
+input UserUpdateOneWithoutImageInput {
+  create: UserCreateWithoutImageInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: UserUpdateWithoutImageDataInput
+  upsert: UserUpsertWithoutImageInput
+}
+
 input UserUpdateOneWithoutPostsInput {
   create: UserCreateWithoutPostsInput
   connect: UserWhereUniqueInput
@@ -3283,7 +3373,7 @@ input UserUpdateWithoutCoursesTakenDataInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   votesCasted: PollOptionVoteUpdateManyWithoutUserInput
@@ -3296,8 +3386,21 @@ input UserUpdateWithoutCoursesTaughtDataInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutAuthorInput
+  coursesTaken: CourseUpdateManyWithoutStudentsInput
+  votesCasted: PollOptionVoteUpdateManyWithoutUserInput
+  postsLiked: PostUpdateManyWithoutLikesInput
+}
+
+input UserUpdateWithoutImageDataInput {
+  email: String
+  password: String
+  username: String
+  firstName: String
+  lastName: String
+  posts: PostUpdateManyWithoutAuthorInput
+  coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
   votesCasted: PollOptionVoteUpdateManyWithoutUserInput
   postsLiked: PostUpdateManyWithoutLikesInput
@@ -3309,7 +3412,7 @@ input UserUpdateWithoutPostsDataInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
   votesCasted: PollOptionVoteUpdateManyWithoutUserInput
@@ -3322,7 +3425,7 @@ input UserUpdateWithoutPostsLikedDataInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
@@ -3335,7 +3438,7 @@ input UserUpdateWithoutVotesCastedDataInput {
   username: String
   firstName: String
   lastName: String
-  imageUrl: String
+  image: FileUpdateOneWithoutUserInput
   posts: PostUpdateManyWithoutAuthorInput
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
@@ -3355,6 +3458,11 @@ input UserUpdateWithWhereUniqueWithoutCoursesTaughtInput {
 input UserUpdateWithWhereUniqueWithoutPostsLikedInput {
   where: UserWhereUniqueInput!
   data: UserUpdateWithoutPostsLikedDataInput!
+}
+
+input UserUpsertWithoutImageInput {
+  update: UserUpdateWithoutImageDataInput!
+  create: UserCreateWithoutImageInput!
 }
 
 input UserUpsertWithoutPostsInput {
@@ -3770,59 +3878,7 @@ input UserWhereInput {
   All values not ending with the given string.
   """
   lastName_not_ends_with: String
-  imageUrl: String
-  """
-  All values that are not equal to given value.
-  """
-  imageUrl_not: String
-  """
-  All values that are contained in given list.
-  """
-  imageUrl_in: [String!]
-  """
-  All values that are not contained in given list.
-  """
-  imageUrl_not_in: [String!]
-  """
-  All values less than the given value.
-  """
-  imageUrl_lt: String
-  """
-  All values less than or equal the given value.
-  """
-  imageUrl_lte: String
-  """
-  All values greater than the given value.
-  """
-  imageUrl_gt: String
-  """
-  All values greater than or equal the given value.
-  """
-  imageUrl_gte: String
-  """
-  All values containing the given string.
-  """
-  imageUrl_contains: String
-  """
-  All values not containing the given string.
-  """
-  imageUrl_not_contains: String
-  """
-  All values starting with the given string.
-  """
-  imageUrl_starts_with: String
-  """
-  All values not starting with the given string.
-  """
-  imageUrl_not_starts_with: String
-  """
-  All values ending with the given string.
-  """
-  imageUrl_ends_with: String
-  """
-  All values not ending with the given string.
-  """
-  imageUrl_not_ends_with: String
+  image: FileWhereInput
   posts_every: PostWhereInput
   posts_some: PostWhereInput
   posts_none: PostWhereInput
