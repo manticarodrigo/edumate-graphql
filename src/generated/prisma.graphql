@@ -32,9 +32,9 @@ type Poll implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  endDate: DateTime
   post(where: PostWhereInput): Post!
   options(where: PollOptionWhereInput, orderBy: PollOptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [PollOption!]
-  endDate: DateTime
 }
 
 type PollOption implements Node {
@@ -286,8 +286,8 @@ input CourseUpdateManyWithoutInstructorsInput {
   connect: [CourseWhereUniqueInput!]
   disconnect: [CourseWhereUniqueInput!]
   delete: [CourseWhereUniqueInput!]
-  update: [CourseUpdateWithoutInstructorsInput!]
-  upsert: [CourseUpsertWithoutInstructorsInput!]
+  update: [CourseUpdateWithWhereUniqueWithoutInstructorsInput!]
+  upsert: [CourseUpsertWithWhereUniqueWithoutInstructorsInput!]
 }
 
 input CourseUpdateManyWithoutStudentsInput {
@@ -295,16 +295,16 @@ input CourseUpdateManyWithoutStudentsInput {
   connect: [CourseWhereUniqueInput!]
   disconnect: [CourseWhereUniqueInput!]
   delete: [CourseWhereUniqueInput!]
-  update: [CourseUpdateWithoutStudentsInput!]
-  upsert: [CourseUpsertWithoutStudentsInput!]
+  update: [CourseUpdateWithWhereUniqueWithoutStudentsInput!]
+  upsert: [CourseUpsertWithWhereUniqueWithoutStudentsInput!]
 }
 
 input CourseUpdateOneWithoutTasksInput {
   create: CourseCreateWithoutTasksInput
   connect: CourseWhereUniqueInput
-  disconnect: CourseWhereUniqueInput
-  delete: CourseWhereUniqueInput
-  update: CourseUpdateWithoutTasksInput
+  disconnect: Boolean
+  delete: Boolean
+  update: CourseUpdateWithoutTasksDataInput
   upsert: CourseUpsertWithoutTasksInput
 }
 
@@ -316,22 +316,12 @@ input CourseUpdateWithoutInstructorsDataInput {
   tasks: TaskUpdateManyWithoutCourseInput
 }
 
-input CourseUpdateWithoutInstructorsInput {
-  where: CourseWhereUniqueInput!
-  data: CourseUpdateWithoutInstructorsDataInput!
-}
-
 input CourseUpdateWithoutStudentsDataInput {
   name: String
   description: String
   imageUrl: String
   instructors: UserUpdateManyWithoutCoursesTaughtInput
   tasks: TaskUpdateManyWithoutCourseInput
-}
-
-input CourseUpdateWithoutStudentsInput {
-  where: CourseWhereUniqueInput!
-  data: CourseUpdateWithoutStudentsDataInput!
 }
 
 input CourseUpdateWithoutTasksDataInput {
@@ -342,27 +332,31 @@ input CourseUpdateWithoutTasksDataInput {
   students: UserUpdateManyWithoutCoursesTakenInput
 }
 
-input CourseUpdateWithoutTasksInput {
+input CourseUpdateWithWhereUniqueWithoutInstructorsInput {
   where: CourseWhereUniqueInput!
-  data: CourseUpdateWithoutTasksDataInput!
+  data: CourseUpdateWithoutInstructorsDataInput!
 }
 
-input CourseUpsertWithoutInstructorsInput {
+input CourseUpdateWithWhereUniqueWithoutStudentsInput {
+  where: CourseWhereUniqueInput!
+  data: CourseUpdateWithoutStudentsDataInput!
+}
+
+input CourseUpsertWithoutTasksInput {
+  update: CourseUpdateWithoutTasksDataInput!
+  create: CourseCreateWithoutTasksInput!
+}
+
+input CourseUpsertWithWhereUniqueWithoutInstructorsInput {
   where: CourseWhereUniqueInput!
   update: CourseUpdateWithoutInstructorsDataInput!
   create: CourseCreateWithoutInstructorsInput!
 }
 
-input CourseUpsertWithoutStudentsInput {
+input CourseUpsertWithWhereUniqueWithoutStudentsInput {
   where: CourseWhereUniqueInput!
   update: CourseUpdateWithoutStudentsDataInput!
   create: CourseCreateWithoutStudentsInput!
-}
-
-input CourseUpsertWithoutTasksInput {
-  where: CourseWhereUniqueInput!
-  update: CourseUpdateWithoutTasksDataInput!
-  create: CourseCreateWithoutTasksInput!
 }
 
 input CourseWhereInput {
@@ -785,8 +779,8 @@ input FileUpdateManyWithoutPostInput {
   connect: [FileWhereUniqueInput!]
   disconnect: [FileWhereUniqueInput!]
   delete: [FileWhereUniqueInput!]
-  update: [FileUpdateWithoutPostInput!]
-  upsert: [FileUpsertWithoutPostInput!]
+  update: [FileUpdateWithWhereUniqueWithoutPostInput!]
+  upsert: [FileUpsertWithWhereUniqueWithoutPostInput!]
 }
 
 input FileUpdateWithoutPostDataInput {
@@ -796,12 +790,12 @@ input FileUpdateWithoutPostDataInput {
   url: String
 }
 
-input FileUpdateWithoutPostInput {
+input FileUpdateWithWhereUniqueWithoutPostInput {
   where: FileWhereUniqueInput!
   data: FileUpdateWithoutPostDataInput!
 }
 
-input FileUpsertWithoutPostInput {
+input FileUpsertWithWhereUniqueWithoutPostInput {
   where: FileWhereUniqueInput!
   update: FileUpdateWithoutPostDataInput!
   create: FileCreateWithoutPostInput!
@@ -1416,16 +1410,15 @@ input PollOptionUpdateManyWithoutPollInput {
   connect: [PollOptionWhereUniqueInput!]
   disconnect: [PollOptionWhereUniqueInput!]
   delete: [PollOptionWhereUniqueInput!]
-  update: [PollOptionUpdateWithoutPollInput!]
-  upsert: [PollOptionUpsertWithoutPollInput!]
+  update: [PollOptionUpdateWithWhereUniqueWithoutPollInput!]
+  upsert: [PollOptionUpsertWithWhereUniqueWithoutPollInput!]
 }
 
 input PollOptionUpdateOneWithoutVotesInput {
   create: PollOptionCreateWithoutVotesInput
   connect: PollOptionWhereUniqueInput
-  disconnect: PollOptionWhereUniqueInput
-  delete: PollOptionWhereUniqueInput
-  update: PollOptionUpdateWithoutVotesInput
+  delete: Boolean
+  update: PollOptionUpdateWithoutVotesDataInput
   upsert: PollOptionUpsertWithoutVotesInput
 }
 
@@ -1434,31 +1427,25 @@ input PollOptionUpdateWithoutPollDataInput {
   votes: PollOptionVoteUpdateManyWithoutOptionInput
 }
 
-input PollOptionUpdateWithoutPollInput {
-  where: PollOptionWhereUniqueInput!
-  data: PollOptionUpdateWithoutPollDataInput!
-}
-
 input PollOptionUpdateWithoutVotesDataInput {
   name: String
   poll: PollUpdateOneWithoutOptionsInput
 }
 
-input PollOptionUpdateWithoutVotesInput {
+input PollOptionUpdateWithWhereUniqueWithoutPollInput {
   where: PollOptionWhereUniqueInput!
-  data: PollOptionUpdateWithoutVotesDataInput!
-}
-
-input PollOptionUpsertWithoutPollInput {
-  where: PollOptionWhereUniqueInput!
-  update: PollOptionUpdateWithoutPollDataInput!
-  create: PollOptionCreateWithoutPollInput!
+  data: PollOptionUpdateWithoutPollDataInput!
 }
 
 input PollOptionUpsertWithoutVotesInput {
-  where: PollOptionWhereUniqueInput!
   update: PollOptionUpdateWithoutVotesDataInput!
   create: PollOptionCreateWithoutVotesInput!
+}
+
+input PollOptionUpsertWithWhereUniqueWithoutPollInput {
+  where: PollOptionWhereUniqueInput!
+  update: PollOptionUpdateWithoutPollDataInput!
+  create: PollOptionCreateWithoutPollInput!
 }
 
 """
@@ -1573,8 +1560,8 @@ input PollOptionVoteUpdateManyWithoutOptionInput {
   connect: [PollOptionVoteWhereUniqueInput!]
   disconnect: [PollOptionVoteWhereUniqueInput!]
   delete: [PollOptionVoteWhereUniqueInput!]
-  update: [PollOptionVoteUpdateWithoutOptionInput!]
-  upsert: [PollOptionVoteUpsertWithoutOptionInput!]
+  update: [PollOptionVoteUpdateWithWhereUniqueWithoutOptionInput!]
+  upsert: [PollOptionVoteUpsertWithWhereUniqueWithoutOptionInput!]
 }
 
 input PollOptionVoteUpdateManyWithoutUserInput {
@@ -1582,35 +1569,35 @@ input PollOptionVoteUpdateManyWithoutUserInput {
   connect: [PollOptionVoteWhereUniqueInput!]
   disconnect: [PollOptionVoteWhereUniqueInput!]
   delete: [PollOptionVoteWhereUniqueInput!]
-  update: [PollOptionVoteUpdateWithoutUserInput!]
-  upsert: [PollOptionVoteUpsertWithoutUserInput!]
+  update: [PollOptionVoteUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [PollOptionVoteUpsertWithWhereUniqueWithoutUserInput!]
 }
 
 input PollOptionVoteUpdateWithoutOptionDataInput {
   user: UserUpdateOneWithoutVotesCastedInput
 }
 
-input PollOptionVoteUpdateWithoutOptionInput {
-  where: PollOptionVoteWhereUniqueInput!
-  data: PollOptionVoteUpdateWithoutOptionDataInput!
-}
-
 input PollOptionVoteUpdateWithoutUserDataInput {
   option: PollOptionUpdateOneWithoutVotesInput
 }
 
-input PollOptionVoteUpdateWithoutUserInput {
+input PollOptionVoteUpdateWithWhereUniqueWithoutOptionInput {
+  where: PollOptionVoteWhereUniqueInput!
+  data: PollOptionVoteUpdateWithoutOptionDataInput!
+}
+
+input PollOptionVoteUpdateWithWhereUniqueWithoutUserInput {
   where: PollOptionVoteWhereUniqueInput!
   data: PollOptionVoteUpdateWithoutUserDataInput!
 }
 
-input PollOptionVoteUpsertWithoutOptionInput {
+input PollOptionVoteUpsertWithWhereUniqueWithoutOptionInput {
   where: PollOptionVoteWhereUniqueInput!
   update: PollOptionVoteUpdateWithoutOptionDataInput!
   create: PollOptionVoteCreateWithoutOptionInput!
 }
 
-input PollOptionVoteUpsertWithoutUserInput {
+input PollOptionVoteUpsertWithWhereUniqueWithoutUserInput {
   where: PollOptionVoteWhereUniqueInput!
   update: PollOptionVoteUpdateWithoutUserDataInput!
   create: PollOptionVoteCreateWithoutUserInput!
@@ -1989,18 +1976,17 @@ input PollUpdateInput {
 input PollUpdateOneWithoutOptionsInput {
   create: PollCreateWithoutOptionsInput
   connect: PollWhereUniqueInput
-  disconnect: PollWhereUniqueInput
-  delete: PollWhereUniqueInput
-  update: PollUpdateWithoutOptionsInput
+  delete: Boolean
+  update: PollUpdateWithoutOptionsDataInput
   upsert: PollUpsertWithoutOptionsInput
 }
 
 input PollUpdateOneWithoutPostInput {
   create: PollCreateWithoutPostInput
   connect: PollWhereUniqueInput
-  disconnect: PollWhereUniqueInput
-  delete: PollWhereUniqueInput
-  update: PollUpdateWithoutPostInput
+  disconnect: Boolean
+  delete: Boolean
+  update: PollUpdateWithoutPostDataInput
   upsert: PollUpsertWithoutPostInput
 }
 
@@ -2009,29 +1995,17 @@ input PollUpdateWithoutOptionsDataInput {
   post: PostUpdateOneWithoutPollInput
 }
 
-input PollUpdateWithoutOptionsInput {
-  where: PollWhereUniqueInput!
-  data: PollUpdateWithoutOptionsDataInput!
-}
-
 input PollUpdateWithoutPostDataInput {
   endDate: DateTime
   options: PollOptionUpdateManyWithoutPollInput
 }
 
-input PollUpdateWithoutPostInput {
-  where: PollWhereUniqueInput!
-  data: PollUpdateWithoutPostDataInput!
-}
-
 input PollUpsertWithoutOptionsInput {
-  where: PollWhereUniqueInput!
   update: PollUpdateWithoutOptionsDataInput!
   create: PollCreateWithoutOptionsInput!
 }
 
 input PollUpsertWithoutPostInput {
-  where: PollWhereUniqueInput!
   update: PollUpdateWithoutPostDataInput!
   create: PollCreateWithoutPostInput!
 }
@@ -2346,8 +2320,8 @@ input PostUpdateManyWithoutAuthorInput {
   connect: [PostWhereUniqueInput!]
   disconnect: [PostWhereUniqueInput!]
   delete: [PostWhereUniqueInput!]
-  update: [PostUpdateWithoutAuthorInput!]
-  upsert: [PostUpsertWithoutAuthorInput!]
+  update: [PostUpdateWithWhereUniqueWithoutAuthorInput!]
+  upsert: [PostUpsertWithWhereUniqueWithoutAuthorInput!]
 }
 
 input PostUpdateManyWithoutLikesInput {
@@ -2355,25 +2329,24 @@ input PostUpdateManyWithoutLikesInput {
   connect: [PostWhereUniqueInput!]
   disconnect: [PostWhereUniqueInput!]
   delete: [PostWhereUniqueInput!]
-  update: [PostUpdateWithoutLikesInput!]
-  upsert: [PostUpsertWithoutLikesInput!]
+  update: [PostUpdateWithWhereUniqueWithoutLikesInput!]
+  upsert: [PostUpsertWithWhereUniqueWithoutLikesInput!]
 }
 
 input PostUpdateOneWithoutImagesInput {
   create: PostCreateWithoutImagesInput
   connect: PostWhereUniqueInput
-  disconnect: PostWhereUniqueInput
-  delete: PostWhereUniqueInput
-  update: PostUpdateWithoutImagesInput
+  disconnect: Boolean
+  delete: Boolean
+  update: PostUpdateWithoutImagesDataInput
   upsert: PostUpsertWithoutImagesInput
 }
 
 input PostUpdateOneWithoutPollInput {
   create: PostCreateWithoutPollInput
   connect: PostWhereUniqueInput
-  disconnect: PostWhereUniqueInput
-  delete: PostWhereUniqueInput
-  update: PostUpdateWithoutPollInput
+  delete: Boolean
+  update: PostUpdateWithoutPollDataInput
   upsert: PostUpsertWithoutPollInput
 }
 
@@ -2384,21 +2357,11 @@ input PostUpdateWithoutAuthorDataInput {
   likes: UserUpdateManyWithoutPostsLikedInput
 }
 
-input PostUpdateWithoutAuthorInput {
-  where: PostWhereUniqueInput!
-  data: PostUpdateWithoutAuthorDataInput!
-}
-
 input PostUpdateWithoutImagesDataInput {
   text: String
   author: UserUpdateOneWithoutPostsInput
   poll: PollUpdateOneWithoutPostInput
   likes: UserUpdateManyWithoutPostsLikedInput
-}
-
-input PostUpdateWithoutImagesInput {
-  where: PostWhereUniqueInput!
-  data: PostUpdateWithoutImagesDataInput!
 }
 
 input PostUpdateWithoutLikesDataInput {
@@ -2408,11 +2371,6 @@ input PostUpdateWithoutLikesDataInput {
   poll: PollUpdateOneWithoutPostInput
 }
 
-input PostUpdateWithoutLikesInput {
-  where: PostWhereUniqueInput!
-  data: PostUpdateWithoutLikesDataInput!
-}
-
 input PostUpdateWithoutPollDataInput {
   text: String
   author: UserUpdateOneWithoutPostsInput
@@ -2420,33 +2378,36 @@ input PostUpdateWithoutPollDataInput {
   likes: UserUpdateManyWithoutPostsLikedInput
 }
 
-input PostUpdateWithoutPollInput {
+input PostUpdateWithWhereUniqueWithoutAuthorInput {
   where: PostWhereUniqueInput!
-  data: PostUpdateWithoutPollDataInput!
+  data: PostUpdateWithoutAuthorDataInput!
 }
 
-input PostUpsertWithoutAuthorInput {
+input PostUpdateWithWhereUniqueWithoutLikesInput {
+  where: PostWhereUniqueInput!
+  data: PostUpdateWithoutLikesDataInput!
+}
+
+input PostUpsertWithoutImagesInput {
+  update: PostUpdateWithoutImagesDataInput!
+  create: PostCreateWithoutImagesInput!
+}
+
+input PostUpsertWithoutPollInput {
+  update: PostUpdateWithoutPollDataInput!
+  create: PostCreateWithoutPollInput!
+}
+
+input PostUpsertWithWhereUniqueWithoutAuthorInput {
   where: PostWhereUniqueInput!
   update: PostUpdateWithoutAuthorDataInput!
   create: PostCreateWithoutAuthorInput!
 }
 
-input PostUpsertWithoutImagesInput {
-  where: PostWhereUniqueInput!
-  update: PostUpdateWithoutImagesDataInput!
-  create: PostCreateWithoutImagesInput!
-}
-
-input PostUpsertWithoutLikesInput {
+input PostUpsertWithWhereUniqueWithoutLikesInput {
   where: PostWhereUniqueInput!
   update: PostUpdateWithoutLikesDataInput!
   create: PostCreateWithoutLikesInput!
-}
-
-input PostUpsertWithoutPollInput {
-  where: PostWhereUniqueInput!
-  update: PostUpdateWithoutPollDataInput!
-  create: PostCreateWithoutPollInput!
 }
 
 input PostWhereInput {
@@ -2799,8 +2760,8 @@ input TaskUpdateManyWithoutCourseInput {
   connect: [TaskWhereUniqueInput!]
   disconnect: [TaskWhereUniqueInput!]
   delete: [TaskWhereUniqueInput!]
-  update: [TaskUpdateWithoutCourseInput!]
-  upsert: [TaskUpsertWithoutCourseInput!]
+  update: [TaskUpdateWithWhereUniqueWithoutCourseInput!]
+  upsert: [TaskUpsertWithWhereUniqueWithoutCourseInput!]
 }
 
 input TaskUpdateWithoutCourseDataInput {
@@ -2809,12 +2770,12 @@ input TaskUpdateWithoutCourseDataInput {
   done: Boolean
 }
 
-input TaskUpdateWithoutCourseInput {
+input TaskUpdateWithWhereUniqueWithoutCourseInput {
   where: TaskWhereUniqueInput!
   data: TaskUpdateWithoutCourseDataInput!
 }
 
-input TaskUpsertWithoutCourseInput {
+input TaskUpsertWithWhereUniqueWithoutCourseInput {
   where: TaskWhereUniqueInput!
   update: TaskUpdateWithoutCourseDataInput!
   create: TaskCreateWithoutCourseInput!
@@ -3278,8 +3239,8 @@ input UserUpdateManyWithoutCoursesTakenInput {
   connect: [UserWhereUniqueInput!]
   disconnect: [UserWhereUniqueInput!]
   delete: [UserWhereUniqueInput!]
-  update: [UserUpdateWithoutCoursesTakenInput!]
-  upsert: [UserUpsertWithoutCoursesTakenInput!]
+  update: [UserUpdateWithWhereUniqueWithoutCoursesTakenInput!]
+  upsert: [UserUpsertWithWhereUniqueWithoutCoursesTakenInput!]
 }
 
 input UserUpdateManyWithoutCoursesTaughtInput {
@@ -3287,8 +3248,8 @@ input UserUpdateManyWithoutCoursesTaughtInput {
   connect: [UserWhereUniqueInput!]
   disconnect: [UserWhereUniqueInput!]
   delete: [UserWhereUniqueInput!]
-  update: [UserUpdateWithoutCoursesTaughtInput!]
-  upsert: [UserUpsertWithoutCoursesTaughtInput!]
+  update: [UserUpdateWithWhereUniqueWithoutCoursesTaughtInput!]
+  upsert: [UserUpsertWithWhereUniqueWithoutCoursesTaughtInput!]
 }
 
 input UserUpdateManyWithoutPostsLikedInput {
@@ -3296,25 +3257,23 @@ input UserUpdateManyWithoutPostsLikedInput {
   connect: [UserWhereUniqueInput!]
   disconnect: [UserWhereUniqueInput!]
   delete: [UserWhereUniqueInput!]
-  update: [UserUpdateWithoutPostsLikedInput!]
-  upsert: [UserUpsertWithoutPostsLikedInput!]
+  update: [UserUpdateWithWhereUniqueWithoutPostsLikedInput!]
+  upsert: [UserUpsertWithWhereUniqueWithoutPostsLikedInput!]
 }
 
 input UserUpdateOneWithoutPostsInput {
   create: UserCreateWithoutPostsInput
   connect: UserWhereUniqueInput
-  disconnect: UserWhereUniqueInput
-  delete: UserWhereUniqueInput
-  update: UserUpdateWithoutPostsInput
+  delete: Boolean
+  update: UserUpdateWithoutPostsDataInput
   upsert: UserUpsertWithoutPostsInput
 }
 
 input UserUpdateOneWithoutVotesCastedInput {
   create: UserCreateWithoutVotesCastedInput
   connect: UserWhereUniqueInput
-  disconnect: UserWhereUniqueInput
-  delete: UserWhereUniqueInput
-  update: UserUpdateWithoutVotesCastedInput
+  delete: Boolean
+  update: UserUpdateWithoutVotesCastedDataInput
   upsert: UserUpsertWithoutVotesCastedInput
 }
 
@@ -3331,11 +3290,6 @@ input UserUpdateWithoutCoursesTakenDataInput {
   postsLiked: PostUpdateManyWithoutLikesInput
 }
 
-input UserUpdateWithoutCoursesTakenInput {
-  where: UserWhereUniqueInput!
-  data: UserUpdateWithoutCoursesTakenDataInput!
-}
-
 input UserUpdateWithoutCoursesTaughtDataInput {
   email: String
   password: String
@@ -3347,11 +3301,6 @@ input UserUpdateWithoutCoursesTaughtDataInput {
   coursesTaken: CourseUpdateManyWithoutStudentsInput
   votesCasted: PollOptionVoteUpdateManyWithoutUserInput
   postsLiked: PostUpdateManyWithoutLikesInput
-}
-
-input UserUpdateWithoutCoursesTaughtInput {
-  where: UserWhereUniqueInput!
-  data: UserUpdateWithoutCoursesTaughtDataInput!
 }
 
 input UserUpdateWithoutPostsDataInput {
@@ -3367,11 +3316,6 @@ input UserUpdateWithoutPostsDataInput {
   postsLiked: PostUpdateManyWithoutLikesInput
 }
 
-input UserUpdateWithoutPostsInput {
-  where: UserWhereUniqueInput!
-  data: UserUpdateWithoutPostsDataInput!
-}
-
 input UserUpdateWithoutPostsLikedDataInput {
   email: String
   password: String
@@ -3383,11 +3327,6 @@ input UserUpdateWithoutPostsLikedDataInput {
   coursesTaught: CourseUpdateManyWithoutInstructorsInput
   coursesTaken: CourseUpdateManyWithoutStudentsInput
   votesCasted: PollOptionVoteUpdateManyWithoutUserInput
-}
-
-input UserUpdateWithoutPostsLikedInput {
-  where: UserWhereUniqueInput!
-  data: UserUpdateWithoutPostsLikedDataInput!
 }
 
 input UserUpdateWithoutVotesCastedDataInput {
@@ -3403,39 +3342,47 @@ input UserUpdateWithoutVotesCastedDataInput {
   postsLiked: PostUpdateManyWithoutLikesInput
 }
 
-input UserUpdateWithoutVotesCastedInput {
+input UserUpdateWithWhereUniqueWithoutCoursesTakenInput {
   where: UserWhereUniqueInput!
-  data: UserUpdateWithoutVotesCastedDataInput!
+  data: UserUpdateWithoutCoursesTakenDataInput!
 }
 
-input UserUpsertWithoutCoursesTakenInput {
+input UserUpdateWithWhereUniqueWithoutCoursesTaughtInput {
+  where: UserWhereUniqueInput!
+  data: UserUpdateWithoutCoursesTaughtDataInput!
+}
+
+input UserUpdateWithWhereUniqueWithoutPostsLikedInput {
+  where: UserWhereUniqueInput!
+  data: UserUpdateWithoutPostsLikedDataInput!
+}
+
+input UserUpsertWithoutPostsInput {
+  update: UserUpdateWithoutPostsDataInput!
+  create: UserCreateWithoutPostsInput!
+}
+
+input UserUpsertWithoutVotesCastedInput {
+  update: UserUpdateWithoutVotesCastedDataInput!
+  create: UserCreateWithoutVotesCastedInput!
+}
+
+input UserUpsertWithWhereUniqueWithoutCoursesTakenInput {
   where: UserWhereUniqueInput!
   update: UserUpdateWithoutCoursesTakenDataInput!
   create: UserCreateWithoutCoursesTakenInput!
 }
 
-input UserUpsertWithoutCoursesTaughtInput {
+input UserUpsertWithWhereUniqueWithoutCoursesTaughtInput {
   where: UserWhereUniqueInput!
   update: UserUpdateWithoutCoursesTaughtDataInput!
   create: UserCreateWithoutCoursesTaughtInput!
 }
 
-input UserUpsertWithoutPostsInput {
-  where: UserWhereUniqueInput!
-  update: UserUpdateWithoutPostsDataInput!
-  create: UserCreateWithoutPostsInput!
-}
-
-input UserUpsertWithoutPostsLikedInput {
+input UserUpsertWithWhereUniqueWithoutPostsLikedInput {
   where: UserWhereUniqueInput!
   update: UserUpdateWithoutPostsLikedDataInput!
   create: UserCreateWithoutPostsLikedInput!
-}
-
-input UserUpsertWithoutVotesCastedInput {
-  where: UserWhereUniqueInput!
-  update: UserUpdateWithoutVotesCastedDataInput!
-  create: UserCreateWithoutVotesCastedInput!
 }
 
 input UserWhereInput {

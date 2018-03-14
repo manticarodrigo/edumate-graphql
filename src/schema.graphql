@@ -13,7 +13,7 @@ type Query {
 type Mutation {
   register(email: String!, password: String!, username: String!, firstName: String!, lastName: String!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
-  createPost(text: String!, files: [Upload], pollOptions: [String]): Post!
+  createPost(text: String!, files: [Upload], pollOptions: [String], pollEndDate: DateTime): Post!
   deletePost(id: ID!): Post!
   createVote(optionId: ID!): PollOption!
 }

@@ -63,9 +63,9 @@ type Poll {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
+  endDate: DateTime
   post: Post! @relation(name: "PostPoll")
   options: [PollOption!]! @relation(name: "PollOptions")
-  endDate: DateTime
 }
 
 type PollOption {
