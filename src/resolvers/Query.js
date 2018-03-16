@@ -15,7 +15,7 @@ const Query = {
   },
 
   feed(parent, args, ctx, info) {
-    return ctx.db.query.posts(null, info)
+    return ctx.db.query.posts({ orderBy: 'createdAt_DESC' }, info)
   },
 
   post(parent, { id }, ctx, info) {
